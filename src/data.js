@@ -74,6 +74,22 @@ export const VIDEO = {
   hero: "/assets/fnf-hero-ambient.mp4",
   process: "/assets/fnf-process-ambient.mp4",
   wallet: "/assets/fnf-wallet-ambient.mp4",
+  moneyRoom: "/assets/fnf-money-room-720.mp4",
+  floor: "/assets/fnf-floor-cockpit-720.mp4",
+  nav: "/assets/fnf-nav-strip-720.mp4",
+  ritual: "/assets/fnf-ritual-720.mp4",
+  trust: "/assets/fnf-trust-720.mp4",
+  quoteRoom: "/assets/fnf-quote-room-720.mp4",
+  stepTrade: "/assets/fnf-step-trade-720.mp4",
+  stepCrews: "/assets/fnf-step-crews-720.mp4",
+  stepWeek: "/assets/fnf-step-week-720.mp4",
+  walletProof: "/assets/fnf-card-wallet-proof-720.mp4",
+  hardCap: "/assets/fnf-card-eight-seats-720.mp4",
+  neverShip: "/assets/fnf-card-never-ship-720.mp4",
+  reportFreeze: "/assets/fnf-card-report-freeze-720.mp4",
+  quoteRasmr: "/assets/fnf-quote-rasmr-720.mp4",
+  quoteTrencher: "/assets/fnf-quote-trencher-720.mp4",
+  footerRoom: "/assets/fnf-footer-room-720.mp4",
 };
 
 export const FILTERS = [

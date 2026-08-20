@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { List, X } from "@phosphor-icons/react";
+import { VIDEO } from "../data.js";
 import { Button, EASE } from "./ui.jsx";
 
 const LINKS = [
@@ -13,8 +14,6 @@ export default function Nav({ onCreate }) {
   const [open, setOpen] = useState(false);
   const [lifted, setLifted] = useState(false);
   const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 90, damping: 24, mass: 0.25 });
 
   useEffect(() => {
     const el = document.getElementById("top-sentinel");
@@ -39,26 +38,36 @@ export default function Nav({ onCreate }) {
       <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-5">
         <div
           className={
-            "pointer-events-auto relative mx-auto grid h-[78px] max-w-[1320px] grid-cols-[auto_1fr_auto] items-center gap-2 rounded-[3px] border p-2 transition-all duration-300 md:gap-3 " +
+            "nav-shell pointer-events-auto relative mx-auto grid h-[76px] max-w-[1280px] grid-cols-[auto_1fr_auto] items-center gap-2 overflow-hidden rounded-full p-2 transition-all duration-300 md:gap-3 " +
             (lifted
-              ? "border-line bg-paper-2/92 shadow-[0_22px_70px_-52px_rgba(28,45,58,.58)] backdrop-blur-xl"
-              : "border-line bg-paper-2/78 backdrop-blur")
+              ? "bg-paper-2/88 shadow-[0_22px_70px_-52px_rgba(28,45,58,.64)] backdrop-blur-2xl"
+              : "bg-paper-2/72 shadow-[0_18px_58px_-50px_rgba(28,45,58,.46)] backdrop-blur-xl")
           }
         >
-          <motion.div
-            className="absolute inset-x-2 bottom-1 h-px origin-left rounded-full bg-volt/70"
-            style={{ scaleX: reduce ? 0 : progress }}
-            aria-hidden="true"
-          />
+          <div className="nav-motion-field pointer-events-none absolute inset-1 overflow-hidden rounded-full" aria-hidden="true">
+            <video
+              className="nav-core-video h-full w-full object-cover opacity-55 mix-blend-multiply"
+              src={VIDEO.nav}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+            <div className="nav-aurora absolute inset-y-2 left-[10%] w-[36%] rounded-full bg-sky/42 blur-xl" />
+            <div className="nav-aurora nav-aurora-b absolute inset-y-2 right-[8%] w-[30%] rounded-full bg-volt/16 blur-xl" />
+            <div className="nav-glint absolute inset-y-0 w-24 rotate-12 bg-white/28 blur-lg" />
+          </div>
+
           <a
             href="#top"
-            className="receipt-rip grid h-full min-w-[126px] place-items-center border-r border-line px-5 text-volt"
+            className="relative grid h-full min-w-[126px] place-items-center rounded-full bg-paper-2/92 px-5 text-volt shadow-[inset_0_0_0_1px_rgb(38_53_68/.08)]"
             aria-label="FNF home"
           >
             <span className="nav-type text-[38px] leading-none">FNF</span>
           </a>
 
-          <div className="relative hidden h-full overflow-hidden border-x border-line bg-paper-2 md:block">
+          <div className="relative hidden h-full md:block">
             <nav
               aria-label="Primary"
               className="absolute inset-0 flex items-center justify-center gap-2"
@@ -67,7 +76,7 @@ export default function Nav({ onCreate }) {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="nav-type rounded-[3px] border border-transparent px-5 py-3 text-[18px] text-ink transition-colors hover:border-line hover:bg-paper-3 hover:text-volt"
+                  className="nav-type rounded-full bg-paper-2/80 px-5 py-3 text-[18px] text-ink shadow-[inset_0_0_0_1px_rgb(38_53_68/.055)] transition-[transform,background-color,color,box-shadow] hover:-translate-y-px hover:bg-paper-3 hover:text-volt hover:shadow-[inset_0_0_0_1px_rgb(49_95_118/.22)]"
                 >
                   {link.label}
                 </a>
@@ -76,7 +85,7 @@ export default function Nav({ onCreate }) {
           </div>
 
           <div className="flex h-full items-center gap-2 justify-self-end">
-            <Button size="sm" variant="volt" className="hidden h-full rounded-[3px] px-6 sm:inline-flex" onClick={onCreate}>
+            <Button size="sm" variant="volt" className="relative hidden h-full rounded-full px-7 sm:inline-flex" onClick={onCreate}>
               <span className="nav-type text-[17px] tracking-[-0.04em]">Start</span>
             </Button>
             <button

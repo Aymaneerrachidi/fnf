@@ -1,12 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Funnel, MagnifyingGlass, Plus, RadioButton } from "@phosphor-icons/react";
-import { FILTERS } from "../data.js";
-import { Button, Chip, EASE, inputClass } from "./ui.jsx";
+import { FILTERS, VIDEO } from "../data.js";
+import { AmbientVideo, Button, Chip, EASE, inputClass } from "./ui.jsx";
 
 const SELECT_FILTERS = FILTERS.filter((f) => f.id !== "style");
 const STYLES = FILTERS.find((f) => f.id === "style").options;
 const ANY = "Any";
+const STAT_LABELS = {
+  crews: "rooms scanned",
+  open: "seats open",
+  requests: "requests sent",
+};
 
 function compatFor(crew, index) {
   const seed = crew.id.split("").reduce((sum, c) => sum + c.charCodeAt(0), 0);
@@ -33,9 +38,10 @@ function CrewRow({ crew, index, requested, onOpen }) {
       viewport={{ once: true, amount: 0.12 }}
       transition={{ duration: 0.42, delay: Math.min(index, 7) * 0.025, ease: EASE }}
       whileHover={reduce ? undefined : { y: -2 }}
-      className="group relative mb-3 rounded-[24px] border border-line bg-paper-2/82 shadow-[0_16px_52px_-48px_rgba(28,45,58,.44)] transition-[background-color,transform,border-color] hover:-translate-y-0.5 hover:border-volt/35 hover:bg-paper-2"
+      className="group relative mb-3 overflow-hidden rounded-[24px] border border-line bg-paper-2/82 shadow-[0_16px_52px_-48px_rgba(28,45,58,.44)] transition-[background-color,transform,border-color] hover:-translate-y-0.5 hover:border-volt/35 hover:bg-paper-2"
       style={{ "--row-tone": palette[0], "--row-ink": palette[1] }}
     >
+      <div className="row-light pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
       <button
         type="button"
         onClick={() => onOpen(crew)}
@@ -106,6 +112,7 @@ function SkeletonRow() {
 }
 
 export default function CrewFinder({ crews, onOpen, requests, onCreate }) {
+  const reduce = useReducedMotion();
   const [query, setQuery] = useState("");
   const [style, setStyle] = useState(ANY);
   const [picks, setPicks] = useState({ cap: ANY, lang: ANY, hours: ANY, voice: ANY });
@@ -142,9 +149,19 @@ export default function CrewFinder({ crews, onOpen, requests, onCreate }) {
     setPicks({ cap: ANY, lang: ANY, hours: ANY, voice: ANY });
   };
 
+  const floorStats = [
+    ["crews", crews.length],
+    ["open", crews.filter((c) => c.members < c.seats).length],
+    ["requests", requests.size],
+  ];
+
   return (
-    <section id="find" className="relative isolate py-28 md:py-44">
+    <section id="find" className="relative isolate overflow-hidden py-28 md:py-44">
       <div className="soft-field opacity-80" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-x-0 top-24 h-[680px] opacity-25 mix-blend-multiply" aria-hidden="true">
+        <AmbientVideo src={VIDEO.floor} className="scale-105" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,var(--paper)_0%,transparent_22%,var(--paper)_92%)]" />
+      </div>
       <div className="shell">
         <div className="flex flex-col gap-7 xl:flex-row xl:items-end xl:justify-between">
           <div className="min-w-0">
@@ -156,34 +173,30 @@ export default function CrewFinder({ crews, onOpen, requests, onCreate }) {
               Browse tiny rooms by rhythm, hours, cap size and how loud the voice chat gets.
             </p>
           </div>
-          <div className="scrap-cut-alt grid w-full max-w-[520px] grid-cols-3 border border-line bg-paper-2/82 text-center shadow-[0_18px_52px_-42px_rgba(28,45,58,.55)] backdrop-blur">
-            {[
-              ["crews", crews.length],
-              ["open", crews.filter((c) => c.members < c.seats).length],
-              ["requests", requests.size],
-            ].map(([k, v]) => (
-              <div key={k} className="border-r border-line px-4 py-3 last:border-r-0 md:px-7">
-                <div className="nums text-2xl font-black text-volt">{v}</div>
-                <div className="utility mt-1 text-ink-3">{k}</div>
-              </div>
-            ))}
-          </div>
+          <p className="max-w-[34ch] text-[15px] leading-relaxed text-ink-2 xl:text-right">
+            One board. Twelve crews. Filter the noise without leaving the floor.
+          </p>
         </div>
 
-        <div className="mt-12 grid gap-4 lg:grid-cols-[302px_1fr]">
-          <aside className="edge h-fit rounded-[24px] bg-paper-2/82 p-4 backdrop-blur-xl lg:sticky lg:top-24">
-              <div className="mb-4 flex items-center gap-2">
-                <Funnel size={17} weight="bold" className="text-volt" />
-                <span className="font-sans text-[13px] font-extrabold tracking-[-0.03em] text-ink">
-                  Filter the floor
-                </span>
-              </div>
+        <motion.div
+          initial={false}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.55, ease: EASE }}
+          className="relative mt-12 overflow-hidden rounded-[34px] border border-line bg-paper-2/82 p-3 shadow-[0_26px_90px_-66px_rgba(28,45,58,.66)] backdrop-blur-xl"
+        >
+          <div className="pointer-events-none absolute inset-0 opacity-30" aria-hidden="true">
+            <AmbientVideo src={VIDEO.floor} className="scale-110" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(255_248_238/.88),rgb(255_248_238/.97))]" />
+          </div>
 
+          <div className="relative rounded-[28px] border border-line bg-paper-2/88 p-4 md:p-5">
+            <div className="grid gap-3 xl:grid-cols-[1.3fr_1fr]">
               <div className="relative">
                 <MagnifyingGlass
-                  size={17}
+                  size={18}
                   weight="bold"
-                  className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-ink-3"
+                  className="pointer-events-none absolute top-1/2 left-5 -translate-y-1/2 text-ink-3"
                   aria-hidden="true"
                 />
                 <label htmlFor="crew-search" className="sr-only">
@@ -194,25 +207,45 @@ export default function CrewFinder({ crews, onOpen, requests, onCreate }) {
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="name, thesis, style"
-                  className={`${inputClass} pl-11`}
+                  placeholder="search room, thesis, meta, language"
+                  className={`${inputClass} h-14 rounded-full bg-paper pl-14 text-[15px]`}
                 />
               </div>
 
-              <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto lg:flex-wrap">
-                <Chip active={style === ANY} onClick={() => setStyle(ANY)}>
+              <div className="grid grid-cols-3 gap-2">
+                {floorStats.map(([k, v], index) => (
+                  <motion.div
+                    key={k}
+                    initial={reduce ? false : { opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.5 }}
+                    transition={{ duration: 0.4, delay: index * 0.04, ease: EASE }}
+                    className="rounded-[22px] border border-line bg-paper/74 px-4 py-3"
+                  >
+                    <span className="utility block text-ink-3">{STAT_LABELS[k]}</span>
+                    <span className="nums mt-1 block text-[28px] font-black leading-none tracking-[-0.08em] text-ink">
+                      {v}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_1.25fr_auto] xl:items-center">
+              <div className="no-scrollbar flex gap-2 overflow-x-auto">
+                <Chip active={style === ANY} onClick={() => setStyle(ANY)} className="px-4">
                   All
                 </Chip>
                 {STYLES.map((s) => (
-                  <Chip key={s} active={style === s} onClick={() => setStyle(s)}>
+                  <Chip key={s} active={style === s} onClick={() => setStyle(s)} className="px-4">
                     {s}
                   </Chip>
                 ))}
               </div>
 
-              <div className="mt-4 grid gap-3">
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                 {SELECT_FILTERS.map((f) => (
-                  <div key={f.id}>
+                  <div key={f.id} className="relative">
                     <label htmlFor={`f-${f.id}`} className="sr-only">
                       {f.name}
                     </label>
@@ -220,9 +253,9 @@ export default function CrewFinder({ crews, onOpen, requests, onCreate }) {
                       id={`f-${f.id}`}
                       value={picks[f.id]}
                       onChange={(e) => setPicks((p) => ({ ...p, [f.id]: e.target.value }))}
-                      className={inputClass}
+                      className="h-11 w-full rounded-full border border-line bg-paper px-3 text-[12px] font-extrabold text-ink outline-none transition-colors focus:border-volt"
                     >
-                      <option value={ANY}>Any {f.name.toLowerCase()}</option>
+                      <option value={ANY}>{f.id === "voice" ? "room" : f.name.toLowerCase()}</option>
                       {f.options.map((o) => (
                         <option key={o} value={o}>
                           {o}
@@ -233,17 +266,20 @@ export default function CrewFinder({ crews, onOpen, requests, onCreate }) {
                 ))}
               </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
-                <p className="utility text-ink-3">{loading ? "filtering" : `${results.length} visible`}</p>
+              <div className="flex items-center justify-between gap-3 xl:justify-end">
+                <span className="utility rounded-full border border-line bg-paper-3 px-3 py-2 text-ink-2">
+                  {loading ? "syncing" : `${results.length} visible`}
+                </span>
                 {active > 0 && (
-                  <button type="button" onClick={reset} className="utility text-volt">
-                    reset
+                  <button type="button" onClick={reset} className="utility rounded-full bg-ink px-4 py-2.5 text-paper">
+                    clear
                   </button>
                 )}
               </div>
-          </aside>
+            </div>
+          </div>
 
-          <div className="rounded-[24px]">
+          <div className="relative mt-4 rounded-[28px]">
             <div className="hidden grid-cols-[330px_minmax(380px,1fr)_270px_64px] gap-0 px-2 pb-3 xl:grid">
               {["crew", "thesis", "signal"].map((h) => (
                 <div key={h} className="font-mono px-5 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-3">
@@ -287,7 +323,7 @@ export default function CrewFinder({ crews, onOpen, requests, onCreate }) {
               </AnimatePresence>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

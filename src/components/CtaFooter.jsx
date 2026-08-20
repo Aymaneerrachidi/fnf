@@ -33,7 +33,7 @@ export default function CtaFooter({ onCreate }) {
     <>
       <section className="relative isolate overflow-hidden border-t border-line">
         <div className="absolute inset-0 -z-10">
-          <AmbientVideo src={VIDEO.hero} poster={IMG.walk} className="photo-grain opacity-38" />
+          <AmbientVideo src={VIDEO.footerRoom || VIDEO.quoteRoom || VIDEO.hero} poster={IMG.walk} className="photo-grain opacity-38" />
           <div className="absolute inset-0 bg-[radial-gradient(70%_70%_at_50%_50%,rgb(255_248_238/.22),var(--paper)_82%)]" />
           <div className="absolute inset-0 bg-paper/66" />
         </div>
@@ -52,7 +52,11 @@ export default function CtaFooter({ onCreate }) {
         </div>
       </section>
 
-      <footer className="border-t border-line bg-paper-2/70 py-16">
+      <footer className="relative isolate overflow-hidden border-t border-line bg-paper-2/70 py-16">
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.16] mix-blend-multiply" aria-hidden="true">
+          <AmbientVideo src={VIDEO.footerRoom || VIDEO.quoteRoom || VIDEO.hero} poster={IMG.walk} className="scale-110" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(255_248_238/.88),rgb(255_248_238/.96))]" />
+        </div>
         <div className="shell grid grid-cols-2 gap-10 md:grid-cols-12">
           <div className="col-span-2 md:col-span-5">
             <span className="nav-type text-[34px] leading-none text-volt">FNF</span>
