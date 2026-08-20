@@ -1,5 +1,6 @@
+import { motion, useReducedMotion } from "motion/react";
 import { IMG, VIDEO } from "../data.js";
-import { AmbientVideo, Button } from "./ui.jsx";
+import { AmbientVideo, Button, EASE } from "./ui.jsx";
 
 const COLUMNS = [
   {
@@ -29,6 +30,8 @@ const COLUMNS = [
 ];
 
 export default function CtaFooter({ onCreate }) {
+  const reduce = useReducedMotion();
+
   return (
     <>
       <section className="relative isolate overflow-hidden border-t border-line">
@@ -52,37 +55,68 @@ export default function CtaFooter({ onCreate }) {
         </div>
       </section>
 
-      <footer className="relative isolate overflow-hidden border-t border-line bg-paper-2/70 py-16">
-        <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.16] mix-blend-multiply" aria-hidden="true">
-          <AmbientVideo src={VIDEO.footerRoom || VIDEO.quoteRoom || VIDEO.hero} poster={IMG.walk} className="scale-110" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(255_248_238/.88),rgb(255_248_238/.96))]" />
+      <footer className="relative isolate overflow-hidden border-t border-volt/20 bg-volt py-16 text-on-volt">
+        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+          <AmbientVideo
+            src={VIDEO.footerRoom || VIDEO.quoteRoom || VIDEO.hero}
+            poster={IMG.walk}
+            className="scale-110 opacity-40 mix-blend-screen"
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(65%_85%_at_74%_40%,rgb(143_204_230/.22),transparent_62%),linear-gradient(180deg,rgb(49_95_118/.58),rgb(28_45_58/.78))]" />
+          <div className="footer-route absolute inset-x-0 top-0 h-px bg-sky/70" />
+          <div className="footer-glow absolute -bottom-24 left-[18%] h-48 w-[46%] rounded-full bg-sky/20 blur-3xl" />
         </div>
-        <div className="shell grid grid-cols-2 gap-10 md:grid-cols-12">
-          <div className="col-span-2 md:col-span-5">
-            <span className="nav-type text-[34px] leading-none text-volt">FNF</span>
-            <p className="mt-4 max-w-[30ch] text-[14px] leading-relaxed text-ink-2">
+
+        <div className="shell grid grid-cols-2 gap-4 md:grid-cols-12 md:gap-5">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.45, ease: EASE }}
+            className="footer-panel col-span-2 rounded-[32px] border border-white/12 bg-paper-2/10 p-7 backdrop-blur-xl md:col-span-5 md:p-8"
+          >
+            <span className="nav-type text-[38px] leading-none text-sky">FNF</span>
+            <p className="mt-4 max-w-[30ch] text-[14px] leading-relaxed text-on-volt/76">
               Friends not followers. A quieter way to find people who trade Solana the way you do.
             </p>
-          </div>
-          {COLUMNS.map((c) => (
-            <nav key={c.head} className="md:col-span-2 md:col-start-auto" aria-label={c.head}>
-              <h3 className="nav-type text-[15px] text-ink">{c.head}</h3>
+            <div className="money-tape mt-8 overflow-hidden rounded-full border border-white/10 bg-paper-2/10 py-2">
+              <div className="money-tape-track flex min-w-max gap-7 px-4">
+                {["one open seat", "private room", "no signal tiers", "trade together", "one open seat", "private room"].map((item, index) => (
+                  <span key={`${item}-${index}`} className="utility text-on-volt/56">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {COLUMNS.map((c, index) => (
+            <motion.nav
+              key={c.head}
+              initial={reduce ? false : { opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.35 }}
+              transition={{ duration: 0.45, delay: 0.05 + index * 0.04, ease: EASE }}
+              className="footer-panel rounded-[32px] border border-white/12 bg-paper-2/10 p-7 backdrop-blur-xl md:col-span-2 md:col-start-auto"
+              aria-label={c.head}
+            >
+              <h3 className="nav-type text-[17px] text-on-volt">{c.head}</h3>
               <ul className="mt-4 flex flex-col gap-2.5">
                 {c.links.map(([label, href]) => (
                   <li key={label}>
                     <a
                       href={href}
-                      className="font-sans text-[14px] font-semibold tracking-[-0.02em] text-ink-2 transition-colors hover:text-ink"
+                      className="font-sans text-[14px] font-semibold tracking-[-0.02em] text-on-volt/64 transition-colors hover:text-sky"
                     >
                       {label}
                     </a>
                   </li>
                 ))}
               </ul>
-            </nav>
+            </motion.nav>
           ))}
         </div>
-        <div className="shell mt-14 flex flex-col gap-3 border-t border-line pt-6 text-[12.5px] text-ink-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="shell mt-5 flex flex-col gap-3 rounded-[28px] border border-white/10 bg-paper-2/8 px-6 py-5 text-[12.5px] text-on-volt/58 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
           <p>Nothing on FNF is financial advice. Memecoins go to zero regularly.</p>
           <p>2026 FNF Labs</p>
         </div>
