@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Oxanium:wght@500;600;700;800&family=Unbounded:wght@600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Jersey+10&family=Pixelify+Sans:wght@400..700&family=Silkscreen:wght@400;700&family=VT323&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -31,10 +31,10 @@
   --color-volt: var(--volt);
   --color-on-volt: var(--on-volt);
   --color-danger: var(--danger);
-  --font-display: "Unbounded", "Arial Black", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Manrope", "Aptos", "Helvetica Neue", Arial, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Chivo Mono", "Cascadia Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
-  --font-nav: "Oxanium", var(--font-sans);
+  --font-display: "Jersey 10", "Arial Black", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Pixelify Sans", "Aptos", "Helvetica Neue", Arial, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "VT323", "Cascadia Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
+  --font-nav: "Silkscreen", var(--font-sans);
 }
 
 @layer base {
@@ -102,25 +102,25 @@
 
 @utility display {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: 0.9;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 0.82;
 }
 
 @utility utility {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.05;
-  letter-spacing: 0.015em;
+  letter-spacing: 0;
   text-transform: lowercase;
   font-weight: 700;
 }
 
 @utility nav-type {
   font-family: var(--font-nav);
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 0.9;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
 }
 
 @utility nums {
