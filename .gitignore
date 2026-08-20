@@ -1,0 +1,11 @@
+node_modules/
+dist/
+/pw-*.png
+/fnf-desktop.png
+/fnf-floor.png
+/fnf-mobile.png
+audit-*.png
+audit-current-*.png
+chrome-audit-*/
+vite-*.log
+social crypto.png
