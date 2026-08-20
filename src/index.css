@@ -279,4 +279,8 @@
   .shimmer::after {
     animation: none;
   }
+
+  video {
+    animation: none;
+  }
 }

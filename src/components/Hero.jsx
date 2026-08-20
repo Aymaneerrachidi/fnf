@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Plus, UsersFour } from "@phosphor-icons/react";
-import { IMG } from "../data.js";
-import { Button, EASE } from "./ui.jsx";
+import { IMG, VIDEO } from "../data.js";
+import { AmbientVideo, Button, EASE } from "./ui.jsx";
 
 const passes = [
   ["Night Shift", "momentum", "1 seat"],
@@ -66,15 +66,11 @@ export default function Hero({ onCreate }) {
           className="relative rounded-[38px] border border-line bg-paper-2/86 p-3 shadow-[0_30px_90px_-62px_rgba(38,53,68,.55)] backdrop-blur-xl"
         >
           <div className="relative aspect-[4/5] overflow-hidden rounded-[32px] border border-line bg-paper-3">
-            <img
-              src={IMG.hero.src}
-              alt=""
-              width={IMG.hero.w}
-              height={IMG.hero.h}
-              className="photo-grain h-full w-full object-cover"
-              loading="eager"
-              fetchPriority="high"
-              decoding="sync"
+            <AmbientVideo
+              src={VIDEO.hero}
+              poster={IMG.hero}
+              priority
+              className="photo-grain"
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_36%,rgb(28_45_58/.84))]" />
 

@@ -1,6 +1,6 @@
 import { ShieldWarning } from "@phosphor-icons/react";
-import { IMG } from "../data.js";
-import { Reveal } from "./ui.jsx";
+import { IMG, VIDEO } from "../data.js";
+import { AmbientVideo, Reveal } from "./ui.jsx";
 
 const NEVER = [
   "Paid signal tiers",
@@ -39,12 +39,10 @@ export default function Safety() {
 
           <Reveal delay={0.06} className="md:col-span-5">
             <div className="edge relative h-full min-h-[240px] overflow-hidden rounded-[34px] bg-paper-2">
-              <img
-                src={IMG.hands.src}
-                alt={IMG.hands.alt}
-                className="photo-grain absolute inset-0 h-full w-full object-cover opacity-70 transition-transform duration-500 ease-out hover:scale-[1.025]"
-                loading="lazy"
-                decoding="async"
+              <AmbientVideo
+                src={VIDEO.wallet}
+                poster={IMG.hands}
+                className="photo-grain absolute inset-0 opacity-70 transition-transform duration-500 ease-out hover:scale-[1.025]"
               />
             </div>
           </Reveal>

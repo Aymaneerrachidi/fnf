@@ -70,6 +70,12 @@ export const IMG = {
   },
 };
 
+export const VIDEO = {
+  hero: "/assets/fnf-hero-ambient.mp4",
+  process: "/assets/fnf-process-ambient.mp4",
+  wallet: "/assets/fnf-wallet-ambient.mp4",
+};
+
 export const FILTERS = [
   {
     id: "style",

@@ -1,5 +1,5 @@
-import { IMG } from "../data.js";
-import { Button, Img } from "./ui.jsx";
+import { IMG, VIDEO } from "../data.js";
+import { AmbientVideo, Button } from "./ui.jsx";
 
 const COLUMNS = [
   {
@@ -33,7 +33,7 @@ export default function CtaFooter({ onCreate }) {
     <>
       <section className="relative isolate overflow-hidden border-t border-line">
         <div className="absolute inset-0 -z-10">
-          <Img slot={IMG.walk} sizes="100vw" className="photo-grain opacity-42" />
+          <AmbientVideo src={VIDEO.hero} poster={IMG.walk} className="photo-grain opacity-38" />
           <div className="absolute inset-0 bg-[radial-gradient(70%_70%_at_50%_50%,rgb(255_248_238/.22),var(--paper)_82%)]" />
           <div className="absolute inset-0 bg-paper/66" />
         </div>

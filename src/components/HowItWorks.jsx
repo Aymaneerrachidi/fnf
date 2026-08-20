@@ -1,5 +1,5 @@
-import { IMG, STEPS } from "../data.js";
-import { Reveal } from "./ui.jsx";
+import { IMG, STEPS, VIDEO } from "../data.js";
+import { AmbientVideo, Reveal } from "./ui.jsx";
 
 export default function HowItWorks() {
   return (
@@ -17,14 +17,10 @@ export default function HowItWorks() {
 
           <Reveal>
             <div className="edge group overflow-hidden rounded-[34px] bg-paper-2">
-              <img
-                src={IMG.process.src}
-                alt={IMG.process.alt}
-                width={IMG.process.w}
-                height={IMG.process.h}
-                className="photo-grain aspect-[16/9] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]"
-                loading="lazy"
-                decoding="async"
+              <AmbientVideo
+                src={VIDEO.process}
+                poster={IMG.process}
+                className="photo-grain aspect-[16/9] transition-transform duration-500 ease-out group-hover:scale-[1.025]"
               />
             </div>
           </Reveal>

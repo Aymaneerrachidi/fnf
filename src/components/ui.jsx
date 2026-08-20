@@ -95,6 +95,23 @@ export function Img({ slot, className = "", priority = false, sizes }) {
   );
 }
 
+export function AmbientVideo({ src, poster, className = "", priority = false }) {
+  return (
+    <video
+      className={`h-full w-full object-cover ${className}`}
+      poster={poster?.src}
+      preload={priority ? "auto" : "metadata"}
+      autoPlay
+      muted
+      loop
+      playsInline
+      aria-hidden="true"
+    >
+      <source src={src} type="video/mp4" />
+    </video>
+  );
+}
+
 /* Scroll reveal. One reason: content arrives in reading order rather
    than all at once, so the eye lands on the headline first. */
 export function Reveal({ children, delay = 0, y = 16, className = "", as = "div" }) {
