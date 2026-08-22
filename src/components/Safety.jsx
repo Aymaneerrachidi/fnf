@@ -1,125 +1,67 @@
 import { motion, useReducedMotion } from "motion/react";
-import { ShieldWarning } from "@phosphor-icons/react";
-import { IMG, VIDEO } from "../data.js";
-import { AmbientVideo, EASE, Reveal } from "./ui.jsx";
+import { Check, ShieldWarning, X } from "@phosphor-icons/react";
+import { UI_ART, UI_VIDEO } from "../data.js";
+import { AmbientVideo, EASE } from "./ui.jsx";
 
-const NEVER = [
-  "Paid signal tiers",
-  "Affiliate links to launchpads",
-  "A cut of anything you lose",
-];
+const NEVER = ["Paid signal tiers", "Affiliate links to launchpads", "A cut of anything you lose"];
 
 export default function Safety() {
   const reduce = useReducedMotion();
-
   return (
-    <section id="rules" className="relative isolate overflow-hidden border-t border-line py-28 md:py-40">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-full opacity-[0.16] mix-blend-multiply" aria-hidden="true">
-        <AmbientVideo src={VIDEO.trust || VIDEO.wallet} poster={IMG.hands} className="scale-110" />
-        <div className="absolute inset-0 bg-[radial-gradient(70%_52%_at_50%_42%,transparent,var(--paper)_82%)]" />
-      </div>
-      <div className="shell">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <h2 className="display max-w-[14ch] text-[clamp(2.4rem,6vw,4.6rem)]">
-            Small rooms fail differently.
-          </h2>
-          <p className="max-w-[36ch] text-[15.5px] leading-relaxed text-ink-2">
-            Eight people can be wrong together. They cannot quietly farm each
-            other, which is the failure mode of every 4000 person alpha server.
-          </p>
-        </div>
+    <section id="rules" className="rules-section relative overflow-hidden py-28 md:py-44">
+      <div className="rules-noise" aria-hidden="true" />
+      <div className="shell relative">
+        <header className="rules-head">
+          <span className="utility">Trust boundary / read twice</span>
+          <h2>REAL PEOPLE.<br />UNSAFE COINS.</h2>
+        </header>
 
-        <div className="mt-14 grid auto-rows-[minmax(140px,auto)] grid-flow-dense grid-cols-1 gap-3 md:grid-cols-12">
-          <Reveal className="md:col-span-7 md:row-span-2">
-            <motion.div
-              whileHover={reduce ? undefined : { y: -4 }}
-              transition={{ duration: 0.32, ease: EASE }}
-              className="step-card relative flex h-full flex-col justify-between gap-10 overflow-hidden rounded-[34px] border border-volt/20 bg-volt p-8 text-on-volt md:p-10"
-            >
-              <div className="pointer-events-none absolute inset-0 opacity-34 mix-blend-screen" aria-hidden="true">
-                <AmbientVideo src={VIDEO.walletProof || VIDEO.trust || VIDEO.wallet} poster={IMG.hands} className="scale-110" />
-                <div className="absolute inset-0 bg-volt/62" />
-              </div>
-              <h3 className="display relative max-w-[16ch] text-[clamp(1.6rem,3.2vw,2.6rem)] text-on-volt">
-                A linked wallet proves a person. It never proves a token.
-              </h3>
-              <p className="relative max-w-[50ch] text-[15px] leading-relaxed text-on-volt/78">
-                FNF checks that the trader across from you is one wallet with one
-                history and one account. That is the entire claim. Nobody here
-                audits a contract for you, and any room that says it does is
-                selling something.
-              </p>
-            </motion.div>
-          </Reveal>
-
-          <Reveal delay={0.06} className="md:col-span-5">
-            <div className="edge relative h-full min-h-[240px] overflow-hidden rounded-[34px] bg-paper-2">
+        <div className="rules-grid">
+          <motion.article
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, ease: EASE }}
+            className="wallet-card"
+          >
+            <div className="wallet-card__art">
               <AmbientVideo
-                src={VIDEO.trust || VIDEO.wallet}
-                poster={IMG.hands}
-                className="photo-grain absolute inset-0 opacity-70 transition-transform duration-500 ease-out hover:scale-[1.025]"
+                src={UI_VIDEO.walletProof}
+                poster={UI_ART.wallet}
+                alt="Two traders linking their wallet identity across a table."
               />
+              <div className="wallet-shield"><ShieldWarning size={28} weight="fill" /></div>
             </div>
-          </Reveal>
+            <div className="wallet-card__copy">
+              <span className="utility">Proof of person</span>
+              <h3>A linked wallet proves a person. It never proves a token.</h3>
+              <p>FNF checks that the trader across from you is one wallet with one history and one account. That is the entire claim. Nobody here audits a contract for you.</p>
+            </div>
+          </motion.article>
 
-          <Reveal delay={0.1} className="md:col-span-5">
-            <motion.div
-              whileHover={reduce ? undefined : { y: -4, scale: 1.01 }}
-              transition={{ duration: 0.32, ease: EASE }}
-              className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-[34px] bg-volt p-8 text-on-volt md:p-10"
-            >
-              <div className="pointer-events-none absolute inset-0 opacity-30 mix-blend-screen" aria-hidden="true">
-                <AmbientVideo src={VIDEO.hardCap || VIDEO.trust || VIDEO.wallet} poster={IMG.hands} className="scale-110" />
-                <div className="absolute inset-0 bg-volt/62" />
-              </div>
-              <div className="floor-orbit pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-paper-3/20 blur-2xl" aria-hidden="true" />
-              <span className="nums relative text-[clamp(3.6rem,8vw,5.6rem)] font-black leading-[0.78]">8</span>
-              <p className="relative max-w-[26ch] text-[15px] leading-relaxed font-bold">
-                The hard cap. Past eight people a room stops being a room and
-                starts being a broadcast.
-              </p>
-            </motion.div>
-          </Reveal>
+          <motion.article
+            initial={reduce ? false : { opacity: 0, x: 18 }}
+            whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.6, delay: 0.08, ease: EASE }}
+            className="cap-card"
+          >
+            <AmbientVideo src={UI_VIDEO.hardCap} poster={UI_ART.world} className="rules-card__motion" />
+            <div className="cap-card__wash" aria-hidden="true" />
+            <span className="cap-card__ghost" aria-hidden="true">8</span>
+            <strong>8</strong>
+            <h3>The hard cap.</h3>
+            <p>Past eight people, a room stops being a room and starts being a broadcast.</p>
+            <div className="seat-grid" aria-hidden="true">{Array.from({ length: 8 }, (_, index) => <i key={index} />)}</div>
+          </motion.article>
 
-          <Reveal delay={0.14} className="md:col-span-6">
-            <motion.div
-              whileHover={reduce ? undefined : { y: -4 }}
-              transition={{ duration: 0.32, ease: EASE }}
-              className="step-card relative flex h-full flex-col justify-center gap-4 overflow-hidden rounded-[34px] border border-volt/20 bg-volt p-8 text-on-volt md:p-10"
-            >
-              <div className="pointer-events-none absolute inset-0 opacity-34 mix-blend-screen" aria-hidden="true">
-                <AmbientVideo src={VIDEO.neverShip || VIDEO.trust || VIDEO.wallet} poster={IMG.ledger} className="scale-110" />
-                <div className="absolute inset-0 bg-volt/62" />
-              </div>
-              <h3 className="utility relative text-on-volt/60">
-                things fnf will never ship
-              </h3>
-              {NEVER.map((line) => (
-                <p key={line} className="display relative text-[clamp(1.15rem,2vw,1.6rem)] text-on-volt">
-                  {line}
-                </p>
-              ))}
-            </motion.div>
-          </Reveal>
-
-          <Reveal delay={0.18} className="md:col-span-6">
-            <motion.div
-              whileHover={reduce ? undefined : { y: -4 }}
-              transition={{ duration: 0.32, ease: EASE }}
-              className="relative flex h-full flex-col justify-between gap-8 overflow-hidden rounded-[34px] border border-volt/20 bg-volt p-8 text-on-volt md:p-10"
-            >
-              <div className="pointer-events-none absolute inset-0 opacity-34 mix-blend-screen" aria-hidden="true">
-                <AmbientVideo src={VIDEO.reportFreeze || VIDEO.trust || VIDEO.wallet} poster={IMG.hands} className="scale-110" />
-                <div className="absolute inset-0 bg-volt/62" />
-              </div>
-              <div className="row-light pointer-events-none absolute inset-x-0 top-0 h-px" aria-hidden="true" />
-              <ShieldWarning size={30} weight="bold" className="relative text-sky" aria-hidden="true" />
-              <p className="relative max-w-[34ch] text-[clamp(1.15rem,2vw,1.6rem)] leading-snug font-bold text-on-volt">
-                One report freezes a room for everybody in it while a human reads
-                the log.
-              </p>
-            </motion.div>
-          </Reveal>
+          <motion.article
+            initial={reduce ? false : { opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, delay: 0.12, ease: EASE }}
+            className="never-card"
+          >
+            <AmbientVideo src={UI_VIDEO.neverShip} poster={UI_ART.wallet} className="rules-card__motion" />
+            <div className="never-card__wash" aria-hidden="true" />
+            <div className="never-card__head"><span className="utility">Things FNF will never ship</span><X size={24} weight="bold" /></div>
+            <ul>{NEVER.map((item) => <li key={item}><X size={16} weight="bold" /><span>{item}</span></li>)}</ul>
+            <div className="never-card__report"><Check size={16} weight="bold" /><p>One report freezes a room for everybody in it while a human reads the log.</p></div>
+          </motion.article>
         </div>
       </div>
     </section>

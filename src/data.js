@@ -92,16 +92,32 @@ export const VIDEO = {
   footerRoom: "/assets/fnf-footer-room-720.mp4",
 };
 
+export const UI_ART = {
+  hero: "/assets/fnf-riso-hero-v2.png",
+  floor: "/assets/fnf-riso-floor-v2.png",
+  match: "/assets/fnf-riso-match-v2.png",
+  trial: "/assets/fnf-riso-trial-v2.png",
+  wallet: "/assets/fnf-riso-wallet-v2.png",
+  social: "/assets/fnf-riso-social-v2.png",
+  world: "/assets/fnf-riso-world-v2.png",
+};
+
+export const UI_VIDEO = {
+  hero: "/assets/fnf-riso-hero-480.mp4",
+  floor: "/assets/fnf-riso-floor-480.mp4",
+  stepTrade: "/assets/fnf-riso-step-trade-480.mp4",
+  stepCrews: "/assets/fnf-riso-step-crews-480.mp4",
+  stepWeek: "/assets/fnf-riso-step-week-480.mp4",
+  walletProof: "/assets/fnf-riso-wallet-proof-480.mp4",
+  hardCap: "/assets/fnf-riso-hard-cap-480.mp4",
+  neverShip: "/assets/fnf-riso-never-ship-480.mp4",
+};
+
 export const FILTERS = [
   {
-    id: "style",
-    name: "Style",
-    options: ["Momentum", "Research", "Takeover", "Snipe", "Hold"],
-  },
-  {
-    id: "cap",
-    name: "Market cap",
-    options: ["Under 100k", "100k to 1M", "1M to 10M", "Over 10M"],
+    id: "trading",
+    name: "Trading",
+    options: ["Memecoins", "Perps", "Day trading"],
   },
   {
     id: "lang",
@@ -126,8 +142,7 @@ export const CREWS = [
     name: "Night Shift",
     thesis:
       "Fresh pools after the New York close. Every call ships with a contract and an exit.",
-    style: "Momentum",
-    cap: "Under 100k",
+    trading: "Memecoins",
     lang: "English",
     hours: "Americas",
     voice: "Voice daily",
@@ -144,8 +159,7 @@ export const CREWS = [
     name: "Frogwater",
     thesis:
       "Slow entries on small caps. Liquidity, holder spread and an invalidation, or it does not get posted.",
-    style: "Research",
-    cap: "100k to 1M",
+    trading: "Memecoins",
     lang: "English",
     hours: "Europe",
     voice: "Voice sometimes",
@@ -162,8 +176,7 @@ export const CREWS = [
     name: "Second Wave",
     thesis:
       "Abandoned tickers with a community still awake. We read the ownership change before the chart.",
-    style: "Takeover",
-    cap: "Under 100k",
+    trading: "Memecoins",
     lang: "English",
     hours: "Around the clock",
     voice: "Voice daily",
@@ -180,8 +193,7 @@ export const CREWS = [
     name: "Salt Flats",
     thesis:
       "One position at a time, held for weeks. Nobody here is watching a five minute candle.",
-    style: "Hold",
-    cap: "1M to 10M",
+    trading: "Perps",
     lang: "English",
     hours: "Americas",
     voice: "Text only",
@@ -198,8 +210,7 @@ export const CREWS = [
     name: "La Tarde",
     thesis:
       "Spanish speaking room, afternoons in Madrid. Charts out loud, no signal spam.",
-    style: "Momentum",
-    cap: "100k to 1M",
+    trading: "Memecoins",
     lang: "Espanol",
     hours: "Europe",
     voice: "Voice daily",
@@ -216,8 +227,7 @@ export const CREWS = [
     name: "Paper Route",
     thesis:
       "Everyone starts with a paper book for two weeks. Post the sheet, then post the trade.",
-    style: "Research",
-    cap: "Under 100k",
+    trading: "Day trading",
     lang: "English",
     hours: "Around the clock",
     voice: "Voice sometimes",
@@ -234,8 +244,7 @@ export const CREWS = [
     name: "Nine Lives",
     thesis:
       "Launch snipes with hard rules. Two misses in a row and you sit out the week.",
-    style: "Snipe",
-    cap: "Under 100k",
+    trading: "Memecoins",
     lang: "English",
     hours: "Asia",
     voice: "Voice daily",
@@ -252,8 +261,7 @@ export const CREWS = [
     name: "Kervan",
     thesis:
       "Turkish room built on one weekly thesis. We argue it on Sunday and trade it all week.",
-    style: "Hold",
-    cap: "1M to 10M",
+    trading: "Perps",
     lang: "Turkce",
     hours: "Europe",
     voice: "Voice sometimes",
@@ -270,8 +278,7 @@ export const CREWS = [
     name: "Warung",
     thesis:
       "Jakarta hours, small size, long conversations. Nobody is trying to sell you a course.",
-    style: "Research",
-    cap: "100k to 1M",
+    trading: "Day trading",
     lang: "Bahasa",
     hours: "Asia",
     voice: "Text only",
@@ -288,8 +295,7 @@ export const CREWS = [
     name: "Les Halles",
     thesis:
       "French room for mid caps only. If it launched today it is not on the table.",
-    style: "Hold",
-    cap: "Over 10M",
+    trading: "Perps",
     lang: "Francais",
     hours: "Europe",
     voice: "Voice sometimes",
@@ -306,8 +312,7 @@ export const CREWS = [
     name: "Cold Open",
     thesis:
       "Asia morning rotation. Two hours of voice, then everyone goes back to a day job.",
-    style: "Momentum",
-    cap: "100k to 1M",
+    trading: "Day trading",
     lang: "English",
     hours: "Asia",
     voice: "Voice daily",
@@ -324,8 +329,7 @@ export const CREWS = [
     name: "The Bakery",
     thesis:
       "Launch snipes on a shared checklist. Contract, mint authority, top ten holders, then size.",
-    style: "Snipe",
-    cap: "Under 100k",
+    trading: "Memecoins",
     lang: "English",
     hours: "Around the clock",
     voice: "Voice daily",
@@ -342,17 +346,20 @@ export const CREWS = [
 export const STEPS = [
   {
     title: "Say how you actually trade",
-    body: "Five answers. Style, size, language, hours, and whether you want a voice room or a quiet one. No resume, no track record required.",
-    image: IMG.process,
+    body: "Four answers. Trading, language, hours, and whether you want a voice room or a quiet one. No resume, no track record required.",
+    image: UI_ART.match,
+    video: UI_VIDEO.stepTrade,
   },
   {
     title: "Meet three crews, not three hundred",
     body: "FNF shortlists rooms that already trade the way you do and still have a seat open. You read the thesis before anyone reads your wallet.",
-    image: IMG.hands,
+    image: UI_ART.floor,
+    video: UI_VIDEO.stepCrews,
   },
   {
     title: "Sit in for a week",
     body: "Every crew runs a trial week. You watch the room, the room watches you, and either side can walk away without a conversation.",
-    image: IMG.ledger,
+    image: UI_ART.trial,
+    video: UI_VIDEO.stepWeek,
   },
 ];

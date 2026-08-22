@@ -62,7 +62,7 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
           <motion.button
             aria-label="Close crew details"
             onClick={onClose}
-            className="fixed inset-0 z-[70] bg-paper/75 backdrop-blur-sm"
+            className="fixed inset-0 z-[70] bg-ink/72 backdrop-blur-sm"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -72,19 +72,19 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
             role="dialog"
             aria-modal="true"
             aria-label={`${crew.name} details`}
-            className="fixed inset-x-0 bottom-0 z-[71] flex max-h-[92dvh] flex-col rounded-t-[3px] border-t border-line bg-paper sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[min(520px,100vw)] sm:max-h-none sm:rounded-none sm:border-t-0 sm:border-l"
+            className="fixed inset-x-0 bottom-0 z-[71] flex max-h-[92dvh] flex-col rounded-t-[3px] border-t border-ink/35 bg-paper-2 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[min(520px,100vw)] sm:max-h-none sm:rounded-none sm:border-t-0 sm:border-l"
             initial={reduce ? false : desktop ? { x: "100%" } : { y: "100%" }}
             animate={{ x: 0, y: 0 }}
             exit={reduce ? { opacity: 0 } : desktop ? { x: "100%" } : { y: "100%" }}
             transition={{ type: "spring", stiffness: 240, damping: 30 }}
           >
-            <header className="flex items-start justify-between gap-4 border-b border-line p-6">
+            <header className="flex items-start justify-between gap-4 border-b border-ink/30 bg-volt p-6 text-on-volt">
               <div className="flex items-center gap-4">
                 <Mark name={crew.name} tone="volt" size={48} />
                 <div>
-                  <h2 className="display text-[28px] leading-none">{crew.name}</h2>
-                  <p className="mt-2 text-[13px] text-ink-2">
-                    {crew.style} <span className="text-ink-3">in</span> {crew.cap}
+                  <h2 className="display text-[46px] leading-[.76]">{crew.name}</h2>
+                  <p className="mt-2 text-[13px] text-on-volt/65">
+                    {crew.trading}
                   </p>
                 </div>
               </div>
@@ -93,7 +93,7 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="grid size-9 shrink-0 place-items-center rounded-full border border-ink/20 text-ink"
+                className="grid size-10 shrink-0 place-items-center rounded-[2px] border border-ink bg-paper-2 text-ink"
               >
                 <X size={16} weight="bold" />
               </button>
@@ -139,7 +139,7 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
                 </div>
               </div>
 
-              <div className="flex gap-3 border-t border-line bg-paper-2 p-6">
+              <div className="flex gap-3 border-t border-line bg-paper-3 p-6">
                 <Info size={18} weight="bold" className="mt-0.5 shrink-0 text-ink-2" />
                 <p className="text-[13px] leading-relaxed text-ink-2">
                   A linked wallet tells you a person is real. It tells you nothing

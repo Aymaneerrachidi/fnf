@@ -7,8 +7,7 @@ import { Button, EASE, Field, inputClass } from "./ui.jsx";
 const EMPTY = {
   name: "",
   thesis: "",
-  style: "Momentum",
-  cap: "Under 100k",
+  trading: "Memecoins",
   lang: "English",
   hours: "Europe",
   voice: "Voice daily",
@@ -75,8 +74,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
         id: `${values.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
         name: values.name.trim(),
         thesis: values.thesis.trim(),
-        style: values.style,
-        cap: values.cap,
+        trading: values.trading,
         lang: values.lang,
         hours: values.hours,
         voice: values.voice,
@@ -92,8 +90,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
   };
 
   const selects = [
-    ["style", "Style"],
-    ["cap", "Market cap"],
+    ["trading", "Trading"],
     ["lang", "Language"],
     ["hours", "Hours"],
     ["voice", "Room"],
@@ -106,7 +103,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
           <motion.button
             aria-label="Close"
             onClick={onClose}
-            className="fixed inset-0 z-[80] bg-paper/75 backdrop-blur-sm"
+            className="fixed inset-0 z-[80] bg-ink/72 backdrop-blur-sm"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -116,15 +113,15 @@ export default function CreateCrew({ open, onClose, onCreated }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="create-title"
-            className="fixed inset-x-0 bottom-0 z-[81] max-h-[92dvh] overflow-y-auto rounded-t-[3px] border-t border-line bg-paper sm:inset-0 sm:m-auto sm:h-fit sm:max-h-[88dvh] sm:w-[min(640px,calc(100vw-32px))] sm:rounded-[3px] sm:border"
+            className="fixed inset-x-0 bottom-0 z-[81] max-h-[92dvh] overflow-y-auto rounded-t-[3px] border-t border-ink/35 bg-paper-2 sm:inset-0 sm:m-auto sm:h-fit sm:max-h-[88dvh] sm:w-[min(640px,calc(100vw-32px))] sm:rounded-[3px] sm:border"
             initial={reduce ? false : { opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 24 }}
             transition={{ duration: 0.32, ease: EASE }}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-line p-6">
+            <div className="flex items-start justify-between gap-4 border-b border-ink/30 bg-paper-3 p-6">
               <div>
-                <h2 id="create-title" className="display text-[30px] leading-none">
+                <h2 id="create-title" className="display text-[48px] leading-[.76]">
                   Start a crew
                 </h2>
                 <p className="mt-2.5 max-w-[42ch] text-[13.5px] text-ink-2">
@@ -136,7 +133,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="grid size-9 shrink-0 place-items-center rounded-full border border-ink/20 text-ink"
+                className="grid size-10 shrink-0 place-items-center rounded-[2px] border border-ink bg-volt text-on-volt"
               >
                 <X size={16} weight="bold" />
               </button>
@@ -146,7 +143,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
               <div className="flex flex-col items-start gap-5 p-6">
                 <CheckCircle size={34} weight="fill" className="text-volt" />
                 <div>
-                  <h3 className="display text-[24px]">{values.name} is live</h3>
+                  <h3 className="display text-[42px] leading-[.8]">{values.name} is live</h3>
                   <p className="mt-2 max-w-[46ch] text-[14px] leading-relaxed text-ink-2">
                     It is at the top of the board with {Number(values.seats) - 1} seats
                     open. Requests land in your inbox.
