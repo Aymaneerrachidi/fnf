@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { lazy, Suspense, useCallback, useState } from "react";
 import { CREWS } from "./data.js";
 import Nav from "./components/Nav.jsx";
 import Hero from "./components/Hero.jsx";
@@ -6,10 +6,11 @@ import LiveStrip from "./components/LiveStrip.jsx";
 import CrewFinder from "./components/CrewFinder.jsx";
 import CrewDrawer from "./components/CrewDrawer.jsx";
 import CreateCrew from "./components/CreateCrew.jsx";
-import HowItWorks from "./components/HowItWorks.jsx";
-import Safety from "./components/Safety.jsx";
 import Voices from "./components/Voices.jsx";
 import CtaFooter from "./components/CtaFooter.jsx";
+
+const HowItWorks = lazy(() => import("./components/HowItWorks.jsx"));
+const Safety = lazy(() => import("./components/Safety.jsx"));
 
 export default function App() {
   const [crews, setCrews] = useState(CREWS);
@@ -40,8 +41,10 @@ export default function App() {
           onOpen={setSelected}
           onCreate={openCreate}
         />
-        <HowItWorks />
-        <Safety />
+        <Suspense fallback={null}>
+          <HowItWorks />
+          <Safety />
+        </Suspense>
         <Voices />
         <CtaFooter onCreate={openCreate} />
       </main>

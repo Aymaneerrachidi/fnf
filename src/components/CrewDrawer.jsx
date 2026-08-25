@@ -72,18 +72,18 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
             role="dialog"
             aria-modal="true"
             aria-label={`${crew.name} details`}
-            className="fixed inset-x-0 bottom-0 z-[71] flex max-h-[92dvh] flex-col rounded-t-[3px] border-t border-ink/35 bg-paper-2 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[min(520px,100vw)] sm:max-h-none sm:rounded-none sm:border-t-0 sm:border-l"
+            className="fixed inset-x-0 bottom-0 z-[71] flex max-h-[92dvh] flex-col rounded-t-[22px] border-t border-line-strong bg-paper-2 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[min(520px,100vw)] sm:max-h-none sm:rounded-none sm:border-t-0 sm:border-l"
             initial={reduce ? false : desktop ? { x: "100%" } : { y: "100%" }}
             animate={{ x: 0, y: 0 }}
             exit={reduce ? { opacity: 0 } : desktop ? { x: "100%" } : { y: "100%" }}
             transition={{ type: "spring", stiffness: 240, damping: 30 }}
           >
-            <header className="flex items-start justify-between gap-4 border-b border-ink/30 bg-volt p-6 text-on-volt">
+            <header className="flex items-start justify-between gap-4 border-b border-line bg-paper-3 p-6 text-ink">
               <div className="flex items-center gap-4">
                 <Mark name={crew.name} tone="volt" size={48} />
                 <div>
                   <h2 className="display text-[46px] leading-[.76]">{crew.name}</h2>
-                  <p className="mt-2 text-[13px] text-on-volt/65">
+                  <p className="mt-2 text-[13px] text-ink-2">
                     {crew.trading}
                   </p>
                 </div>
@@ -93,7 +93,7 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="grid size-10 shrink-0 place-items-center rounded-[2px] border border-ink bg-paper-2 text-ink"
+                className="grid size-10 shrink-0 place-items-center rounded-full border border-line-strong bg-paper-2 text-ink"
               >
                 <X size={16} weight="bold" />
               </button>
@@ -150,7 +150,7 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
 
             <footer className="border-t border-line p-6">
               {state === "sent" ? (
-                <div className="flex items-center gap-3 rounded-[3px] border border-ink/20 px-4 py-3.5">
+                <div className="flex items-center gap-3 rounded-[14px] border border-line px-4 py-3.5">
                   <CheckCircle size={20} weight="fill" className="shrink-0 text-volt" />
                   <p className="text-[13.5px] font-medium text-ink">
                     Request sent. {crew.lead.name.split(" ")[0]} usually answers within a day.

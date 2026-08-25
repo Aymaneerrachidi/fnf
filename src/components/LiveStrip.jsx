@@ -1,21 +1,34 @@
-import { CREWS } from "../data.js";
+const ROOMS = [
+  ["Night Shift", "Memecoins", "1 seat"],
+  ["Frogwater", "Memecoins", "2 seats"],
+  ["Paper Route", "Day trading", "4 seats"],
+  ["Nine Lives", "Memecoins", "2 seats"],
+  ["Kervan", "Perps", "1 seat"],
+  ["The Bakery", "Memecoins", "1 seat"],
+];
+
+function Track({ hidden = false }) {
+  return (
+    <div className="room-ticker__track" aria-hidden={hidden || undefined}>
+      {ROOMS.map(([name, trading, seats]) => (
+        <a key={`${name}-${hidden}`} href="#find" className="room-ticker__item">
+          <strong>{name}</strong>
+          <span>{trading}</span>
+          <span>{seats}</span>
+        </a>
+      ))}
+    </div>
+  );
+}
 
 export default function LiveStrip() {
-  const open = CREWS.filter((crew) => crew.members < crew.seats);
-  const items = [...open, ...open];
-
   return (
-    <div className="live-strip" aria-label="Live open rooms">
-      <div className="ticker-track flex w-max items-center">
-        {items.map((crew, index) => (
-          <div className="live-slip" key={`${crew.id}-${index}`}>
-            <span className="live-dot" aria-hidden="true" />
-            <strong>{crew.name}</strong>
-            <span>{crew.trading}</span>
-            <b>{crew.seats - crew.members} seat{crew.seats - crew.members === 1 ? "" : "s"}</b>
-          </div>
-        ))}
+    <section className="room-ticker" aria-label="Open crews">
+      <div className="room-ticker__label">Open rooms</div>
+      <div className="room-ticker__window">
+        <Track />
+        <Track hidden />
       </div>
-    </div>
+    </section>
   );
 }

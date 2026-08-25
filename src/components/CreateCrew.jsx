@@ -113,7 +113,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="create-title"
-            className="fixed inset-x-0 bottom-0 z-[81] max-h-[92dvh] overflow-y-auto rounded-t-[3px] border-t border-ink/35 bg-paper-2 sm:inset-0 sm:m-auto sm:h-fit sm:max-h-[88dvh] sm:w-[min(640px,calc(100vw-32px))] sm:rounded-[3px] sm:border"
+            className="fixed inset-x-0 bottom-0 z-[81] max-h-[92dvh] overflow-y-auto rounded-t-[22px] border-t border-line-strong bg-paper-2 sm:inset-0 sm:m-auto sm:h-fit sm:max-h-[88dvh] sm:w-[min(640px,calc(100vw-32px))] sm:rounded-[22px] sm:border"
             initial={reduce ? false : { opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 24 }}
@@ -133,7 +133,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="grid size-10 shrink-0 place-items-center rounded-[2px] border border-ink bg-volt text-on-volt"
+                className="grid size-10 shrink-0 place-items-center rounded-full border border-accent bg-volt text-on-volt"
               >
                 <X size={16} weight="bold" />
               </button>

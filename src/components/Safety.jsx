@@ -1,67 +1,100 @@
-import { motion, useReducedMotion } from "motion/react";
-import { Check, ShieldWarning, X } from "@phosphor-icons/react";
-import { UI_ART, UI_VIDEO } from "../data.js";
-import { AmbientVideo, EASE } from "./ui.jsx";
+import { useEffect, useRef } from "react";
+import { useReducedMotion } from "motion/react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Check, ShieldCheck, UsersThree } from "@phosphor-icons/react";
 
-const NEVER = ["Paid signal tiers", "Affiliate links to launchpads", "A cut of anything you lose"];
+gsap.registerPlugin(ScrollTrigger);
+
+const NEVER = [
+  "Paid signal tiers",
+  "Affiliate links to launchpads",
+  "A cut of anything you lose",
+];
 
 export default function Safety() {
+  const root = useRef(null);
+  const media = useRef(null);
   const reduce = useReducedMotion();
+
+  useEffect(() => {
+    if (reduce || !root.current || !media.current) return undefined;
+
+    const context = gsap.context(() => {
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: media.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1,
+          },
+        })
+        .fromTo(media.current, { scale: 0.88, opacity: 0.28 }, { scale: 1, opacity: 1, ease: "none" })
+        .to(media.current, { scale: 0.96, opacity: 0.35, ease: "none" });
+    }, root);
+
+    return () => context.revert();
+  }, [reduce]);
+
   return (
-    <section id="rules" className="rules-section relative overflow-hidden py-28 md:py-44">
-      <div className="rules-noise" aria-hidden="true" />
-      <div className="shell relative">
-        <header className="rules-head">
-          <span className="utility">Trust boundary / read twice</span>
-          <h2>REAL PEOPLE.<br />UNSAFE COINS.</h2>
+    <section id="rules" ref={root} className="safety-section section-space">
+      <div className="shell">
+        <header className="section-heading safety-heading">
+          <h2>Small rooms. Clear boundaries.</h2>
+          <p>
+            A linked wallet can prove one account belongs to one person. It never proves a token is safe.
+          </p>
         </header>
 
-        <div className="rules-grid">
-          <motion.article
-            initial={reduce ? false : { opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, ease: EASE }}
-            className="wallet-card"
-          >
-            <div className="wallet-card__art">
-              <AmbientVideo
-                src={UI_VIDEO.walletProof}
-                poster={UI_ART.wallet}
-                alt="Two traders linking their wallet identity across a table."
-              />
-              <div className="wallet-shield"><ShieldWarning size={28} weight="fill" /></div>
-            </div>
-            <div className="wallet-card__copy">
-              <span className="utility">Proof of person</span>
-              <h3>A linked wallet proves a person. It never proves a token.</h3>
-              <p>FNF checks that the trader across from you is one wallet with one history and one account. That is the entire claim. Nobody here audits a contract for you.</p>
-            </div>
-          </motion.article>
+        <div className="trust-bento">
+          <figure ref={media} className="trust-bento__image">
+            <img
+              src="/assets/fnf-glass-eight.webp"
+              alt="Eight glass keys arranged around an open center."
+              loading="lazy"
+            />
+          </figure>
 
-          <motion.article
-            initial={reduce ? false : { opacity: 0, x: 18 }}
-            whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.6, delay: 0.08, ease: EASE }}
-            className="cap-card"
-          >
-            <AmbientVideo src={UI_VIDEO.hardCap} poster={UI_ART.world} className="rules-card__motion" />
-            <div className="cap-card__wash" aria-hidden="true" />
-            <span className="cap-card__ghost" aria-hidden="true">8</span>
-            <strong>8</strong>
-            <h3>The hard cap.</h3>
-            <p>Past eight people, a room stops being a room and starts being a broadcast.</p>
-            <div className="seat-grid" aria-hidden="true">{Array.from({ length: 8 }, (_, index) => <i key={index} />)}</div>
-          </motion.article>
+          <article className="trust-bento__cap">
+            <UsersThree size={30} weight="duotone" />
+            <div>
+              <h3>Eight is the hard cap.</h3>
+              <p>Past eight people, a room becomes a broadcast. FNF keeps it a conversation.</p>
+            </div>
+          </article>
 
-          <motion.article
-            initial={reduce ? false : { opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, delay: 0.12, ease: EASE }}
-            className="never-card"
-          >
-            <AmbientVideo src={UI_VIDEO.neverShip} poster={UI_ART.wallet} className="rules-card__motion" />
-            <div className="never-card__wash" aria-hidden="true" />
-            <div className="never-card__head"><span className="utility">Things FNF will never ship</span><X size={24} weight="bold" /></div>
-            <ul>{NEVER.map((item) => <li key={item}><X size={16} weight="bold" /><span>{item}</span></li>)}</ul>
-            <div className="never-card__report"><Check size={16} weight="bold" /><p>One report freezes a room for everybody in it while a human reads the log.</p></div>
-          </motion.article>
+          <article className="trust-bento__fact">
+            <strong>7 days</strong>
+            <span>Trial week</span>
+          </article>
+          <article className="trust-bento__fact">
+            <strong>0 tiers</strong>
+            <span>No paid signals</span>
+          </article>
+          <article className="trust-bento__fact">
+            <strong>1 review</strong>
+            <span>Human, not automated</span>
+          </article>
+        </div>
+
+        <div className="safety-contract">
+          <div className="safety-contract__copy">
+            <ShieldCheck size={32} weight="duotone" />
+            <h3>FNF verifies people, not trades.</h3>
+            <p>
+              You decide what to buy, what to size, and when to leave. A report pauses a room while a person reads the log.
+            </p>
+          </div>
+          <div className="never-list">
+            <h3>What FNF will never ship</h3>
+            {NEVER.map((item) => (
+              <div key={item}>
+                <Check size={17} weight="bold" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
