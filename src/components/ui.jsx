@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 export const EASE = [0.16, 1, 0.3, 1];
 
 const BASE =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold " +
+  "fnf-key-button inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold " +
   "transition-[transform,background-color,color,border-color,box-shadow] duration-300 ease-out " +
   "active:scale-[.98] disabled:pointer-events-none disabled:opacity-40";
 

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { CREWS } from "./data.js";
 import Nav from "./components/Nav.jsx";
 import Hero from "./components/Hero.jsx";
@@ -8,6 +8,9 @@ import CrewDrawer from "./components/CrewDrawer.jsx";
 import CreateCrew from "./components/CreateCrew.jsx";
 import Voices from "./components/Voices.jsx";
 import CtaFooter from "./components/CtaFooter.jsx";
+import GlobalCrews from "./components/GlobalCrews.jsx";
+import ClanProof from "./components/ClanProof.jsx";
+import useClickSound from "./hooks/useClickSound.js";
 
 const HowItWorks = lazy(() => import("./components/HowItWorks.jsx"));
 const Safety = lazy(() => import("./components/Safety.jsx"));
@@ -17,6 +20,15 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [requests, setRequests] = useState(() => new Set());
   const [creating, setCreating] = useState(false);
+  const { soundEnabled, toggleSound } = useClickSound();
+
+  useEffect(() => {
+    if (!window.location.hash) return undefined;
+    const timer = window.setTimeout(() => {
+      document.querySelector(window.location.hash)?.scrollIntoView({ block: "start" });
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const openCreate = useCallback(() => setCreating(true), []);
 
@@ -31,7 +43,7 @@ export default function App() {
   return (
     <>
       <div className="grain" aria-hidden="true" />
-      <Nav onCreate={openCreate} />
+      <Nav onCreate={openCreate} soundEnabled={soundEnabled} onToggleSound={toggleSound} />
       <main className="w-full max-w-full overflow-x-hidden">
         <Hero onCreate={openCreate} />
         <LiveStrip />
@@ -45,6 +57,8 @@ export default function App() {
           <HowItWorks />
           <Safety />
         </Suspense>
+        <GlobalCrews />
+        <ClanProof />
         <Voices />
         <CtaFooter onCreate={openCreate} />
       </main>

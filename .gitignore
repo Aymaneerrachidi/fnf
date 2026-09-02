@@ -10,3 +10,7 @@ audit-current-*.png
 chrome-audit-*/
 vite-*.log
 social crypto.png
+/audits/
+/design/
+/new ui direction/
+/image-prompts.txt

@@ -9,8 +9,8 @@ export default function Hero({ onCreate }) {
   return (
     <section id="top" className="hero-section relative isolate min-h-[100dvh] overflow-hidden">
       <motion.img
-        src="/assets/fnf-glass-crew-hero.webp"
-        alt="Eight glass trading keys connected around a shared market console."
+        src="/assets/fnf-brand-hero-v2.png"
+        alt="Glossy retro-futurist keycaps gathered around a shared trading console."
         className="hero-media"
         loading="eager"
         fetchPriority="high"
@@ -32,8 +32,8 @@ export default function Hero({ onCreate }) {
           transition={{ duration: 0.7, delay: 0.38, ease: EASE }}
         >
           <p>
-            FNF matches independent traders with small private crews. Browse theses,
-            request a seat, and trial the room for seven days.
+            FNF matches independent traders with small private crews. Browse rooms,
+            request a seat, or create one.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button size="lg" onClick={browse}>

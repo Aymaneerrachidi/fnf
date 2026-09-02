@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowUpRight, List, X } from "@phosphor-icons/react";
+import { ArrowUpRight, List, SpeakerHigh, SpeakerSlash, X } from "@phosphor-icons/react";
 import { Button, EASE } from "./ui.jsx";
 
 const LINKS = [
@@ -9,7 +9,7 @@ const LINKS = [
   { href: "#rules", label: "Safety" },
 ];
 
-export default function Nav({ onCreate }) {
+export default function Nav({ onCreate, soundEnabled, onToggleSound }) {
   const [open, setOpen] = useState(false);
   const [compact, setCompact] = useState(false);
   const reduce = useReducedMotion();
@@ -53,10 +53,16 @@ export default function Nav({ onCreate }) {
           </nav>
 
           <div className="nav-actions">
-            <a className="nav-find hidden sm:inline-flex" href="#find">
-              Browse crews
-              <ArrowUpRight size={15} weight="bold" />
-            </a>
+            <button
+              type="button"
+              className="nav-sound hidden sm:inline-grid"
+              onClick={onToggleSound}
+              aria-label={`${soundEnabled ? "Turn off" : "Turn on"} interface sounds`}
+              aria-pressed={soundEnabled}
+              title={`${soundEnabled ? "Mute" : "Enable"} interface sounds`}
+            >
+              {soundEnabled ? <SpeakerHigh size={17} weight="bold" /> : <SpeakerSlash size={17} weight="bold" />}
+            </button>
             <Button size="sm" onClick={onCreate} className="hidden sm:inline-flex">
               Start a crew
             </Button>
@@ -106,6 +112,10 @@ export default function Nav({ onCreate }) {
               ))}
             </nav>
             <div className="p-5">
+              <button type="button" className="mobile-sound" onClick={onToggleSound} aria-pressed={soundEnabled}>
+                {soundEnabled ? <SpeakerHigh size={18} /> : <SpeakerSlash size={18} />}
+                Interface sounds {soundEnabled ? "on" : "off"}
+              </button>
               <Button className="w-full" size="lg" onClick={() => { close(); onCreate(); }}>
                 Start a crew
               </Button>

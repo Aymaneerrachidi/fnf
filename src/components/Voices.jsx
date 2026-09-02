@@ -1,75 +1,70 @@
-import { useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowLeft, ArrowRight } from "@phosphor-icons/react";
+import { motion, useReducedMotion } from "motion/react";
+import { ArrowUpRight } from "@phosphor-icons/react";
 import { EASE } from "./ui.jsx";
 
-const QUOTES = [
+const TRADERS = [
   {
-    quote: "You need to be in a good group chat if you're gonna trade memes.",
     name: "Rasmr",
-    context: "On trading memes",
-    image: "/assets/fnf-glass-quote-room.webp",
+    handle: "@rasmr_eth",
+    result: "Up $500K on Fomo.",
+    image: "/assets/traders/trader-rasmr-key-v2.png",
+    source: "https://x.com/LeviGMI/status/2086151812432691591",
   },
   {
-    quote: "Most successful traders are in private FNF's.",
-    name: "Trencher",
-    context: "On private rooms",
-    image: "/assets/fnf-glass-private-room.webp",
+    name: "Orangie",
+    handle: "@orangie",
+    result: "Made $3M on-chain.",
+    image: "/assets/traders/trader-orangie-key-v3.png",
+    source: "https://www.tiktok.com/@clipsbykes/video/7677238495773068566?is_from_webapp=1&sender_device=pc",
+  },
+  {
+    name: "Requisiem",
+    handle: "@requisiem",
+    result: "Made $18M.",
+    image: "/assets/traders/trader-requisiem-key-v2.png",
+    source: "https://x.com/RowdyClips/status/2091729714259845602?s=20",
   },
 ];
 
 export default function Voices() {
-  const [index, setIndex] = useState(0);
   const reduce = useReducedMotion();
-  const active = QUOTES[index];
-  const move = (direction) => setIndex((current) => (current + direction + QUOTES.length) % QUOTES.length);
 
   return (
-    <section className="voices-section section-space">
+    <section id="voices" className="voices-section voices-simple section-space" aria-labelledby="voices-title">
       <div className="shell">
-        <div className="voices-frame">
-          <div className="voices-media" aria-hidden="true">
-            <div className="voices-media__back" />
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={active.image}
-                src={active.image}
-                alt=""
-                initial={reduce ? false : { opacity: 0, scale: 0.94, rotate: -2 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                exit={{ opacity: 0, scale: 1.04, rotate: 2 }}
-                transition={{ duration: 0.55, ease: EASE }}
-              />
-            </AnimatePresence>
+        <header className="voices-simple__heading">
+          <div>
+            <span className="pixel-kicker">People, not follower counts</span>
+            <h2 id="voices-title">Trading gets better when the room gets smaller.</h2>
           </div>
+          <p>Public wins get attention. The people around the trade are what make the difference.</p>
+        </header>
 
-          <div className="voices-copy" aria-live="polite">
-            <AnimatePresence mode="wait">
-              <motion.blockquote
-                key={active.name}
-                initial={reduce ? false : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.45, ease: EASE }}
-              >
-                “{active.quote}”
-              </motion.blockquote>
-            </AnimatePresence>
-            <div className="voices-meta">
-              <div>
-                <strong>{active.name}</strong>
-                <span>{active.context}</span>
+        <div className="trader-proof-grid">
+          {TRADERS.map((trader, index) => (
+            <motion.article
+              className="trader-proof"
+              key={trader.name}
+              initial={reduce ? false : { opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.24 }}
+              transition={{ duration: 0.55, delay: index * 0.07, ease: EASE }}
+            >
+              <div className="trader-proof__image">
+                <img src={trader.image} alt={`${trader.name} portrait on an FNF keycap`} loading="lazy" decoding="async" />
               </div>
-              <div className="voices-controls">
-                <button type="button" onClick={() => move(-1)} aria-label="Previous quote">
-                  <ArrowLeft size={18} weight="bold" />
-                </button>
-                <button type="button" onClick={() => move(1)} aria-label="Next quote">
-                  <ArrowRight size={18} weight="bold" />
-                </button>
+              <div className="trader-proof__body">
+                <div className="trader-proof__identity">
+                  <strong>{trader.name}</strong>
+                  <span>{trader.handle}</span>
+                </div>
+                <h3>{trader.result}</h3>
+                <a className="trader-proof__source" href={trader.source} target="_blank" rel="noreferrer">
+                  View public source <ArrowUpRight size={15} weight="bold" />
+                </a>
               </div>
-            </div>
-          </div>
+            </motion.article>
+          ))}
         </div>
       </div>
     </section>

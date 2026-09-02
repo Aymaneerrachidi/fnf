@@ -87,11 +87,11 @@ export default function CrewFinder({ crews, onOpen, requests, onCreate }) {
     <section id="find" className="floor-section section-space">
       <div className="shell">
         <header className="section-heading floor-heading">
-          <h2>Rooms built around a thesis.</h2>
+          <h2>Rooms built around your vibe.</h2>
           <p>
-            Read how a crew trades before anyone sees your wallet. Every room stays small enough for an actual conversation.
+            Find your trading circle. Every room stays small enough for an actual conversation.
           </p>
-          <span>{crews.length} rooms, {openRooms} with a seat open</span>
+          <span>Connect. Trade. Build your circle. · {crews.length} rooms, {openRooms} open</span>
         </header>
 
         <div className="filter-console">

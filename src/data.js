@@ -45,7 +45,7 @@ export const IMG = {
     src: "/assets/fnf-degen-process.png",
     w: 1672,
     h: 941,
-    alt: "A ripped-paper triptych showing a preferences card, a crew chat invite, and a trial week receipt pile.",
+    alt: "A ripped-paper triptych showing a preferences card, a crew shortlist, and an open-seat request.",
   },
   stickers: {
     path: "/assets/fnf-degen-stickers.png",
@@ -357,8 +357,8 @@ export const STEPS = [
     video: UI_VIDEO.stepCrews,
   },
   {
-    title: "Sit in for a week",
-    body: "Every crew runs a trial week. You watch the room, the room watches you, and either side can walk away without a conversation.",
+    title: "Request the open seat",
+    body: "The room lead gets your trading profile. You both decide whether the fit is right, then the room opens.",
     image: UI_ART.trial,
     video: UI_VIDEO.stepWeek,
   },
