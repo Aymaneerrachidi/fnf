@@ -1,7 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
-export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
-export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
+const productionUrl = "https://rngoiswvuhoqtlfbhxpw.supabase.co";
+const productionPublishableKey = "sb_publishable_umzjilX3k5UqCZBCZH9HvQ_xEPWt5PX";
+
+export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim()
+  || (import.meta.env.PROD ? productionUrl : undefined);
+export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim()
+  || (import.meta.env.PROD ? productionPublishableKey : undefined);
 
 export const backendConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
