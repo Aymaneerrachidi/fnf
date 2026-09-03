@@ -6,6 +6,12 @@ const configuredOrigins = (Deno.env.get("ALLOWED_ORIGINS") || "*")
 function allowedOrigin(request: Request) {
   const origin = request.headers.get("origin") || "";
   if (configuredOrigins.includes("*")) return "*";
+  try {
+    const local = new URL(origin);
+    if (["localhost", "127.0.0.1"].includes(local.hostname)) return origin;
+  } catch {
+    // Requests without a browser origin continue through the configured allow-list.
+  }
   return configuredOrigins.includes(origin) ? origin : configuredOrigins[0];
 }
 

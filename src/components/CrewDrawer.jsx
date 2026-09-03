@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { CheckCircle, Info, SpinnerGap, X } from "@phosphor-icons/react";
+import { ArrowRight, CheckCircle, Crown, Info, SpinnerGap, X } from "@phosphor-icons/react";
 import { Button, Mark } from "./ui.jsx";
 
 function useIsDesktop() {
@@ -25,7 +25,7 @@ function Stat({ k, v }) {
   );
 }
 
-export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
+export default function CrewDrawer({ crew, onClose, requested, onRequest, onEnter }) {
   const reduce = useReducedMotion();
   const desktop = useIsDesktop();
   const [state, setState] = useState("idle"); // idle | sending | sent
@@ -109,6 +109,13 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
 
             <div className="flex-1 overflow-y-auto">
               <div className="p-6">
+                {crew.membershipRole && (
+                  <div className="mb-6 flex items-center gap-3 rounded-[14px] border border-accent/35 bg-accent/8 px-4 py-3 text-[13px] text-ink">
+                    <Crown size={18} weight="fill" className="text-accent" />
+                    <span>{crew.membershipRole === "owner" ? "You run this room." : "You are an active member of this room."}</span>
+                    {crew.membershipRole === "owner" && crew.pendingRequests > 0 && <b className="ml-auto">{crew.pendingRequests} waiting</b>}
+                  </div>
+                )}
                 <p className="text-[16px] leading-relaxed text-ink">{crew.thesis}</p>
 
                 <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4">
@@ -162,7 +169,12 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
                   {error}
                 </p>
               )}
-              {state === "sent" ? (
+              {crew.membershipRole ? (
+                <Button variant="volt" size="lg" className="w-full" onClick={() => onEnter(crew)}>
+                  {crew.membershipRole === "owner" ? "Manage room" : "Enter room"}
+                  <ArrowRight size={17} weight="bold" />
+                </Button>
+              ) : state === "sent" ? (
                 <div className="flex items-center gap-3 rounded-[14px] border border-line px-4 py-3.5">
                   <CheckCircle size={20} weight="fill" className="shrink-0 text-volt" />
                   <p className="text-[13.5px] font-medium text-ink">

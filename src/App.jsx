@@ -11,6 +11,8 @@ import CtaFooter from "./components/CtaFooter.jsx";
 import GlobalCrews from "./components/GlobalCrews.jsx";
 import ClanProof from "./components/ClanProof.jsx";
 import AuthModal from "./components/AuthModal.jsx";
+import ProductApp from "./components/ProductApp.jsx";
+import RoomWorkspace from "./components/RoomWorkspace.jsx";
 import useClickSound from "./hooks/useClickSound.js";
 import { createCrew, loadCrews, requestSeat } from "./services/crews.js";
 import { getCurrentSession, signOut, watchSession } from "./services/auth.js";
@@ -25,6 +27,9 @@ export default function App() {
   const [requests, setRequests] = useState(() => new Set());
   const [creating, setCreating] = useState(false);
   const [session, setSession] = useState(null);
+  const [sessionReady, setSessionReady] = useState(!backendConfigured);
+  const [crewsLoading, setCrewsLoading] = useState(false);
+  const [activeRoom, setActiveRoom] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
   const { soundEnabled, toggleSound } = useClickSound();
@@ -50,23 +55,31 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    getCurrentSession().finally(() => setSessionReady(true));
+  }, []);
+
+  const refreshCrews = useCallback(async () => {
+    setCrewsLoading(true);
+    try {
+      const { crews: loaded } = await loadCrews();
+      setCrews(loaded);
+      setRequests(new Set(loaded.filter((crew) => crew.requested).map((crew) => crew.id)));
+      setSelected((current) => current ? loaded.find((crew) => crew.id === current.id) || null : null);
+      setActiveRoom((current) => current ? loaded.find((crew) => crew.id === current.id) || current : null);
+    } catch (error) {
+      console.error("FNF backend could not load crews; using local data.", error);
+    } finally {
+      setCrewsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
     let active = true;
-
-    loadCrews()
-      .then(({ crews: loaded }) => {
-        if (active) {
-          setCrews(loaded);
-          setRequests(new Set(loaded.filter((crew) => crew.requested).map((crew) => crew.id)));
-        }
-      })
-      .catch((error) => {
-        console.error("FNF backend could not load crews; using local data.", error);
-      });
-
+    if (active) refreshCrews();
     return () => {
       active = false;
     };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, refreshCrews]);
 
   const openAuth = useCallback(() => {
     setPendingAction(null);
@@ -85,6 +98,7 @@ export default function App() {
   const handleCreated = useCallback(async (values) => {
     const crew = await createCrew(values);
     setCrews((list) => [crew, ...list]);
+    setSelected(crew);
     return crew;
   }, []);
 
@@ -116,8 +130,48 @@ export default function App() {
   }, [pendingAction]);
 
   const handleSignOut = useCallback(() => {
+    setActiveRoom(null);
     signOut().catch((error) => console.error("FNF sign-out failed.", error));
   }, []);
+
+  if (!sessionReady) {
+    return <div className="app-boot" aria-label="Loading FNF"><span>FNF</span><i /></div>;
+  }
+
+  if (session && activeRoom) {
+    return (
+      <>
+        <RoomWorkspace crew={activeRoom} session={session} onLeave={() => setActiveRoom(null)} onCrewChanged={refreshCrews} />
+        <div className="grain" aria-hidden="true" />
+      </>
+    );
+  }
+
+  if (session) {
+    return (
+      <>
+        <div className="grain" aria-hidden="true" />
+        <ProductApp
+          session={session}
+          crews={crews}
+          loading={crewsLoading}
+          onRefresh={refreshCrews}
+          onOpenCrew={setSelected}
+          onEnterRoom={setActiveRoom}
+          onCreate={openCreate}
+          onSignOut={handleSignOut}
+        />
+        <CrewDrawer
+          crew={selected}
+          onClose={() => setSelected(null)}
+          requested={selected ? requests.has(selected.id) : false}
+          onRequest={handleRequest}
+          onEnter={(crew) => { setSelected(null); setActiveRoom(crew); }}
+        />
+        <CreateCrew open={creating} onClose={() => setCreating(false)} onCreated={handleCreated} />
+      </>
+    );
+  }
 
   return (
     <>
@@ -154,6 +208,7 @@ export default function App() {
         onClose={() => setSelected(null)}
         requested={selected ? requests.has(selected.id) : false}
         onRequest={handleRequest}
+        onEnter={(crew) => { setSelected(null); setActiveRoom(crew); }}
       />
       <CreateCrew
         open={creating}

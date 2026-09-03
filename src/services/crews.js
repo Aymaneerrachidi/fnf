@@ -5,6 +5,7 @@ function toCrew(row) {
   return {
     id: row.id,
     slug: row.slug,
+    ownerId: row.owner_id,
     name: row.name,
     thesis: row.thesis,
     trading: row.trading,
@@ -18,6 +19,9 @@ function toCrew(row) {
     track: row.track_record || "No history yet",
     access: row.access_mode || "Open",
     requested: Boolean(row.requested),
+    requestStatus: row.my_request_status || null,
+    membershipRole: row.membership_role || null,
+    pendingRequests: Number(row.pending_request_count ?? 0),
     lead: {
       name: row.owner_name || "FNF trader",
       handle: row.owner_handle || "member",
@@ -88,6 +92,66 @@ export async function requestSeat(crewId) {
   if (error) throw error;
 
   return { id: data, crewId, status: "pending" };
+}
+
+export async function loadCrewRequests(crewId) {
+  await ensureSession();
+  const { data, error } = await supabase.rpc("list_crew_requests", { p_crew_id: crewId });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function decideSeatRequest(requestId, decision) {
+  await ensureSession();
+  const { data, error } = await supabase.rpc("decide_seat_request", {
+    p_request_id: requestId,
+    p_decision: decision,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function loadCrewMembers(crewId) {
+  await ensureSession();
+  const { data, error } = await supabase.rpc("list_crew_members", { p_crew_id: crewId });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function updateCrew(crewId, values) {
+  const session = await ensureSession();
+  const changes = {
+    name: values.name.trim(),
+    thesis: values.thesis.trim(),
+    trading: values.trading,
+    language: values.lang,
+    market_hours: values.hours,
+    voice_preference: values.voice,
+    capacity: Number(values.seats),
+  };
+  const { error } = await supabase.from("crews").update(changes).eq("id", crewId).eq("owner_id", session.user.id);
+  if (error) throw error;
+  return true;
+}
+
+export async function archiveCrew(crewId) {
+  const session = await ensureSession();
+  const { error } = await supabase.from("crews").update({ status: "archived" }).eq("id", crewId).eq("owner_id", session.user.id);
+  if (error) throw error;
+}
+
+export async function removeCrewMember(crewId, userId) {
+  await ensureSession();
+  const { data, error } = await supabase.rpc("remove_crew_member", { p_crew_id: crewId, p_user_id: userId });
+  if (error) throw error;
+  return data;
+}
+
+export async function leaveCrew(crewId) {
+  await ensureSession();
+  const { data, error } = await supabase.rpc("leave_crew", { p_crew_id: crewId });
+  if (error) throw error;
+  return data;
 }
 
 export { backendConfigured };
