@@ -58,7 +58,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
     setErrors((prev) => (prev[k] ? { ...prev, [k]: undefined } : prev));
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     const found = validate(values);
     setErrors(found);
@@ -68,25 +68,16 @@ export default function CreateCrew({ open, onClose, onCreated }) {
       return;
     }
     setState("saving");
-    setTimeout(() => {
+    try {
+      await onCreated(values);
       setState("done");
-      onCreated({
-        id: `${values.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
-        name: values.name.trim(),
-        thesis: values.thesis.trim(),
-        trading: values.trading,
-        lang: values.lang,
-        hours: values.hours,
-        voice: values.voice,
-        members: 1,
-        seats: Number(values.seats),
-        live: 1,
-        age: "Started today",
-        track: "No history yet",
-        access: "Open",
-        lead: { name: "You", handle: "your handle" },
-      });
-    }, 900);
+    } catch (error) {
+      setState("idle");
+      setErrors((current) => ({
+        ...current,
+        form: error.message || "The crew could not be created. Try again.",
+      }));
+    }
   };
 
   const selects = [
@@ -155,6 +146,11 @@ export default function CreateCrew({ open, onClose, onCreated }) {
               </div>
             ) : (
               <form onSubmit={submit} noValidate className="flex flex-col gap-6 p-6">
+                {errors.form && (
+                  <p role="alert" className="rounded-[12px] border border-accent px-4 py-3 text-[13px] text-ink">
+                    {errors.form}
+                  </p>
+                )}
                 <Field id="crew-name" label="Crew name" error={errors.name}>
                   <input
                     id="crew-name"

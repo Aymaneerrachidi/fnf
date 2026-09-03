@@ -29,10 +29,12 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
   const reduce = useReducedMotion();
   const desktop = useIsDesktop();
   const [state, setState] = useState("idle"); // idle | sending | sent
+  const [error, setError] = useState("");
   const closeRef = useRef(null);
 
   useEffect(() => {
     setState(requested ? "sent" : "idle");
+    setError("");
   }, [crew, requested]);
 
   useEffect(() => {
@@ -47,12 +49,18 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
     };
   }, [crew, onClose]);
 
-  const send = () => {
+  const send = async () => {
     setState("sending");
-    setTimeout(() => {
+    setError("");
+    try {
+      await onRequest(crew.id);
       setState("sent");
-      onRequest(crew.id);
-    }, 900);
+    } catch (requestError) {
+      setState("idle");
+      if (requestError.code !== "AUTH_REQUIRED") {
+        setError(requestError.message || "The request could not be sent. Try again.");
+      }
+    }
   };
 
   return (
@@ -149,6 +157,11 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest }) {
             </div>
 
             <footer className="border-t border-line p-6">
+              {error && (
+                <p role="alert" className="mb-3 rounded-[12px] border border-accent px-4 py-3 text-[13px] text-ink">
+                  {error}
+                </p>
+              )}
               {state === "sent" ? (
                 <div className="flex items-center gap-3 rounded-[14px] border border-line px-4 py-3.5">
                   <CheckCircle size={20} weight="fill" className="shrink-0 text-volt" />

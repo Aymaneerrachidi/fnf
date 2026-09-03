@@ -10,7 +10,11 @@ import Voices from "./components/Voices.jsx";
 import CtaFooter from "./components/CtaFooter.jsx";
 import GlobalCrews from "./components/GlobalCrews.jsx";
 import ClanProof from "./components/ClanProof.jsx";
+import AuthModal from "./components/AuthModal.jsx";
 import useClickSound from "./hooks/useClickSound.js";
+import { createCrew, loadCrews, requestSeat } from "./services/crews.js";
+import { getCurrentSession, signOut, watchSession } from "./services/auth.js";
+import { AuthRequiredError, backendConfigured } from "./lib/supabase.js";
 
 const HowItWorks = lazy(() => import("./components/HowItWorks.jsx"));
 const Safety = lazy(() => import("./components/Safety.jsx"));
@@ -20,6 +24,9 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [requests, setRequests] = useState(() => new Set());
   const [creating, setCreating] = useState(false);
+  const [session, setSession] = useState(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
   const { soundEnabled, toggleSound } = useClickSound();
 
   useEffect(() => {
@@ -30,20 +37,99 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const openCreate = useCallback(() => setCreating(true), []);
-
-  const handleCreated = useCallback((crew) => {
-    setCrews((list) => [crew, ...list]);
+  useEffect(() => {
+    let active = true;
+    getCurrentSession()
+      .then((current) => active && setSession(current))
+      .catch((error) => console.error("FNF session could not be restored.", error));
+    const stopWatching = watchSession((current) => active && setSession(current));
+    return () => {
+      active = false;
+      stopWatching();
+    };
   }, []);
 
-  const handleRequest = useCallback((id) => {
+  useEffect(() => {
+    let active = true;
+
+    loadCrews()
+      .then(({ crews: loaded }) => {
+        if (active) {
+          setCrews(loaded);
+          setRequests(new Set(loaded.filter((crew) => crew.requested).map((crew) => crew.id)));
+        }
+      })
+      .catch((error) => {
+        console.error("FNF backend could not load crews; using local data.", error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session?.user?.id]);
+
+  const openAuth = useCallback(() => {
+    setPendingAction(null);
+    setAuthOpen(true);
+  }, []);
+
+  const openCreate = useCallback(() => {
+    if (backendConfigured && !session) {
+      setPendingAction({ type: "create" });
+      setAuthOpen(true);
+      return;
+    }
+    setCreating(true);
+  }, [session]);
+
+  const handleCreated = useCallback(async (values) => {
+    const crew = await createCrew(values);
+    setCrews((list) => [crew, ...list]);
+    return crew;
+  }, []);
+
+  const handleRequest = useCallback(async (id) => {
+    if (backendConfigured && !session) {
+      setPendingAction({ type: "request", id });
+      setAuthOpen(true);
+      throw new AuthRequiredError();
+    }
+    await requestSeat(id);
     setRequests((prev) => new Set(prev).add(id));
+    return true;
+  }, [session]);
+
+  const handleAuthenticated = useCallback(async (nextSession) => {
+    setSession(nextSession);
+    setAuthOpen(false);
+    const action = pendingAction;
+    setPendingAction(null);
+    if (action?.type === "create") setCreating(true);
+    if (action?.type === "request") {
+      try {
+        await requestSeat(action.id);
+        setRequests((prev) => new Set(prev).add(action.id));
+      } catch (error) {
+        console.error("Pending seat request failed after sign-in.", error);
+      }
+    }
+  }, [pendingAction]);
+
+  const handleSignOut = useCallback(() => {
+    signOut().catch((error) => console.error("FNF sign-out failed.", error));
   }, []);
 
   return (
     <>
       <div className="grain" aria-hidden="true" />
-      <Nav onCreate={openCreate} soundEnabled={soundEnabled} onToggleSound={toggleSound} />
+      <Nav
+        onCreate={openCreate}
+        onAuth={openAuth}
+        onSignOut={handleSignOut}
+        signedIn={Boolean(session)}
+        soundEnabled={soundEnabled}
+        onToggleSound={toggleSound}
+      />
       <main className="w-full max-w-full overflow-x-hidden">
         <Hero onCreate={openCreate} />
         <LiveStrip />
@@ -73,6 +159,14 @@ export default function App() {
         open={creating}
         onClose={() => setCreating(false)}
         onCreated={handleCreated}
+      />
+      <AuthModal
+        open={authOpen}
+        onClose={() => {
+          setAuthOpen(false);
+          setPendingAction(null);
+        }}
+        onAuthenticated={handleAuthenticated}
       />
     </>
   );

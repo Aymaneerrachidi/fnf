@@ -35,7 +35,10 @@ npm run preview
 
 ## Architecture
 
-The project is a client-side React application built with Vite. UI state and mock crew data live locally; there is currently no backend or wallet transaction layer.
+The project is a React application built with Vite. It includes an optional
+Supabase backend for crew discovery, creation, seat requests, authentication,
+and realtime-ready room messages. Without environment credentials it falls
+back to the local crew data, so visual development remains self-contained.
 
 - React 19 for component and interaction state
 - Motion and GSAP for restrained entrance and scroll animation
@@ -43,6 +46,7 @@ The project is a client-side React application built with Vite. UI state and moc
 - Phosphor icons
 - Self-hosted typefaces and local visual assets
 - Web Audio API synthesis for the mechanical click feedback
+- Supabase email authentication, Postgres, RLS, and Realtime for the first backend slice
 
 ## Project structure
 
@@ -50,6 +54,8 @@ The project is a client-side React application built with Vite. UI state and moc
 src/
   components/   Interface sections and overlays
   hooks/        Shared interaction behavior
+  lib/          Supabase client and session bootstrap
+  services/     Frontend data access layer
   data.js       Mock crews and local asset references
   index.css     Brand, layout, responsive, and motion system
 public/
@@ -57,7 +63,13 @@ public/
   fonts/        Self-hosted typography
 docs/
   fnf-preview.png
+  BACKEND.md
+supabase/
+  migrations/   Database schema, policies, and RPC functions
+  seed.sql      Optional demo-room data
 ```
+
+Backend setup is documented in [docs/BACKEND.md](docs/BACKEND.md).
 
 ## Notes
 

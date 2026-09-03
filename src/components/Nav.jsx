@@ -9,7 +9,7 @@ const LINKS = [
   { href: "#rules", label: "Safety" },
 ];
 
-export default function Nav({ onCreate, soundEnabled, onToggleSound }) {
+export default function Nav({ onCreate, onAuth, onSignOut, signedIn, soundEnabled, onToggleSound }) {
   const [open, setOpen] = useState(false);
   const [compact, setCompact] = useState(false);
   const reduce = useReducedMotion();
@@ -63,9 +63,20 @@ export default function Nav({ onCreate, soundEnabled, onToggleSound }) {
             >
               {soundEnabled ? <SpeakerHigh size={17} weight="bold" /> : <SpeakerSlash size={17} weight="bold" />}
             </button>
-            <Button size="sm" onClick={onCreate} className="hidden sm:inline-flex">
-              Start a crew
-            </Button>
+            {signedIn ? (
+              <>
+                <Button size="sm" variant="secondary" onClick={onSignOut} className="hidden sm:inline-flex">
+                  Sign out
+                </Button>
+                <Button size="sm" onClick={onCreate} className="hidden sm:inline-flex">
+                  Start a crew
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" onClick={onAuth} className="hidden sm:inline-flex">
+                Sign in
+              </Button>
+            )}
             <button
               type="button"
               className="nav-menu md:hidden"
@@ -116,9 +127,20 @@ export default function Nav({ onCreate, soundEnabled, onToggleSound }) {
                 {soundEnabled ? <SpeakerHigh size={18} /> : <SpeakerSlash size={18} />}
                 Interface sounds {soundEnabled ? "on" : "off"}
               </button>
-              <Button className="w-full" size="lg" onClick={() => { close(); onCreate(); }}>
-                Start a crew
-              </Button>
+              {signedIn ? (
+                <div className="flex gap-3">
+                  <Button className="flex-1" size="lg" variant="secondary" onClick={() => { close(); onSignOut(); }}>
+                    Sign out
+                  </Button>
+                  <Button className="flex-1" size="lg" onClick={() => { close(); onCreate(); }}>
+                    Start a crew
+                  </Button>
+                </div>
+              ) : (
+                <Button className="w-full" size="lg" onClick={() => { close(); onAuth(); }}>
+                  Create account
+                </Button>
+              )}
             </div>
           </motion.div>
         )}
