@@ -1,4 +1,3 @@
-import { CREWS } from "../data.js";
 import { backendConfigured, ensureSession, supabase } from "../lib/supabase.js";
 
 function toCrew(row) {
@@ -8,6 +7,8 @@ function toCrew(row) {
     ownerId: row.owner_id,
     name: row.name,
     thesis: row.thesis,
+    description: row.description || "",
+    avatarUrl: row.avatar_url || null,
     trading: row.trading,
     lang: row.language,
     hours: row.market_hours,
@@ -25,6 +26,7 @@ function toCrew(row) {
     lead: {
       name: row.owner_name || "FNF trader",
       handle: row.owner_handle || "member",
+      avatarUrl: row.owner_avatar_url || null,
     },
   };
 }
@@ -49,7 +51,7 @@ function makeLocalCrew(values) {
 }
 
 export async function loadCrews() {
-  if (!backendConfigured) return { crews: CREWS, source: "mock" };
+  if (!backendConfigured) return { crews: [], source: "offline" };
 
   const { data, error } = await supabase.rpc("list_crews");
   if (error) throw error;
@@ -64,6 +66,8 @@ export async function createCrew(values) {
   const { data: crewId, error } = await supabase.rpc("create_crew", {
     p_name: values.name.trim(),
     p_thesis: values.thesis.trim(),
+    p_description: values.description?.trim() || "",
+    p_avatar_url: values.avatarUrl || null,
     p_trading: values.trading,
     p_language: values.lang,
     p_market_hours: values.hours,
@@ -123,6 +127,8 @@ export async function updateCrew(crewId, values) {
   const changes = {
     name: values.name.trim(),
     thesis: values.thesis.trim(),
+    description: values.description?.trim() || "",
+    avatar_url: values.avatarUrl || null,
     trading: values.trading,
     language: values.lang,
     market_hours: values.hours,

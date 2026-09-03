@@ -3,7 +3,7 @@ import { ensureSession, supabase } from "../lib/supabase.js";
 export async function loadProfile() {
   const session = await ensureSession();
   const [{ data: profile, error: profileError }, { data: trading, error: tradingError }] = await Promise.all([
-    supabase.from("profiles").select("display_name, handle, avatar_url, wallet_address").eq("id", session.user.id).single(),
+    supabase.from("profiles").select("display_name, handle, avatar_url, wallet_address, provider, social_url").eq("id", session.user.id).single(),
     supabase.from("trading_profiles").select("trading, language, market_hours, voice_preference, bio").eq("user_id", session.user.id).single(),
   ]);
   if (profileError) throw profileError;
@@ -17,6 +17,8 @@ export async function saveProfile(values) {
     supabase.from("profiles").update({
       display_name: values.displayName.trim(),
       handle: values.handle.trim().toLowerCase(),
+      avatar_url: values.avatarUrl || null,
+      social_url: values.socialUrl?.trim() || null,
     }).eq("id", session.user.id),
     supabase.from("trading_profiles").update({
       trading: values.trading,

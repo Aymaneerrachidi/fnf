@@ -1,10 +1,19 @@
 import { json, options } from "../_shared/http.ts";
 
 const SOLANA_ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+const EVM_ADDRESS = /^0x(?:[a-fA-F0-9]{40}|[a-fA-F0-9]{64})$/;
+const NETWORKS: Record<string, { gecko: string | null; address: RegExp }> = {
+  solana: { gecko: "solana", address: SOLANA_ADDRESS },
+  base: { gecko: "base", address: EVM_ADDRESS },
+  bsc: { gecko: "bsc", address: EVM_ADDRESS },
+  robinhood: { gecko: null, address: EVM_ADDRESS },
+};
 const CACHE = { "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30" };
 
-function address(value: string | null, name: string) {
-  if (!value || !SOLANA_ADDRESS.test(value)) throw new Error(`${name} is not a valid Solana address`);
+function address(value: string | null, name: string, network = "solana") {
+  const chain = NETWORKS[network];
+  if (!chain) throw new Error("Unsupported network");
+  if (!value || !chain.address.test(value)) throw new Error(`${name} is not a valid ${network} address`);
   return value;
 }
 
@@ -40,7 +49,14 @@ Deno.serve(async (request) => {
     }
 
     if (action === "ohlcv") {
-      const pool = address(url.searchParams.get("pool"), "Pool");
+      const network = url.searchParams.get("network") || "solana";
+      const chain = NETWORKS[network];
+      if (!chain) return json(request, { error: "Unsupported chart network" }, 400);
+      if (!chain.gecko) return json(request, {
+        error: "Robinhood Chain is connected, but indexed DEX candle data is not available yet.",
+        code: "INDEXER_PENDING",
+      }, 422);
+      const pool = address(url.searchParams.get("pool"), "Pool", network);
       const timeframe = url.searchParams.get("timeframe") || "minute";
       if (!["minute", "hour", "day"].includes(timeframe)) {
         return json(request, { error: "Unsupported chart timeframe" }, 400);
@@ -49,7 +65,7 @@ Deno.serve(async (request) => {
       const aggregate = Math.max(1, Math.min(60, Number(url.searchParams.get("aggregate")) || 1));
       const limit = Math.max(20, Math.min(500, Number(url.searchParams.get("limit")) || 300));
       const endpoint = new URL(
-        `https://api.geckoterminal.com/api/v2/networks/solana/pools/${pool}/ohlcv/${timeframe}`,
+        `https://api.geckoterminal.com/api/v2/networks/${chain.gecko}/pools/${pool}/ohlcv/${timeframe}`,
       );
       endpoint.searchParams.set("aggregate", String(aggregate));
       endpoint.searchParams.set("limit", String(limit));

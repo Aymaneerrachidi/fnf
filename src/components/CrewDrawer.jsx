@@ -88,7 +88,7 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest, onEnte
           >
             <header className="flex items-start justify-between gap-4 border-b border-line bg-paper-3 p-6 text-ink">
               <div className="flex items-center gap-4">
-                <Mark name={crew.name} tone="volt" size={48} />
+                {crew.avatarUrl ? <img className="fnf-avatar" src={crew.avatarUrl} alt="" style={{ width: 48, height: 48 }} /> : <Mark name={crew.name} tone="volt" size={48} />}
                 <div>
                   <h2 className="display text-[46px] leading-[.76]">{crew.name}</h2>
                   <p className="mt-2 text-[13px] text-ink-2">
@@ -117,6 +117,7 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest, onEnte
                   </div>
                 )}
                 <p className="text-[16px] leading-relaxed text-ink">{crew.thesis}</p>
+                {crew.description && <p className="mt-4 text-[14px] leading-relaxed text-ink-2">{crew.description}</p>}
 
                 <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4">
                   <Stat k="Seats" v={`${crew.members} of ${crew.seats}`} />
@@ -146,7 +147,7 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest, onEnte
               <div className="border-t border-line p-6">
                 <h3 className="text-[13px] font-bold text-ink">Who runs it</h3>
                 <div className="mt-4 flex items-center gap-3">
-                  <Mark name={crew.lead.name} size={40} />
+                  {crew.lead.avatarUrl ? <img className="fnf-avatar" src={crew.lead.avatarUrl} alt="" style={{ width: 40, height: 40 }} /> : <Mark name={crew.lead.name} size={40} />}
                   <div>
                     <div className="text-[14px] font-bold text-ink">{crew.lead.name}</div>
                     <div className="text-[13px] text-ink-2">{crew.lead.handle}</div>

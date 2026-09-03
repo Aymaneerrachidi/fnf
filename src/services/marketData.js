@@ -32,10 +32,11 @@ export function getTokenPools(tokenAddress) {
   return callMarketData({ action: "token", address: tokenAddress });
 }
 
-export function getPoolCandles(poolAddress, timeframe = "minute", aggregate = 1, limit = 300) {
+export function getPoolCandles(poolAddress, network = "solana", timeframe = "minute", aggregate = 1, limit = 300) {
   return callMarketData({
     action: "ohlcv",
     pool: poolAddress,
+    network,
     timeframe,
     aggregate,
     limit,

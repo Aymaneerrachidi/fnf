@@ -1,33 +1,25 @@
-const ROOMS = [
-  ["Night Shift", "Memecoins", "1 seat"],
-  ["Frogwater", "Memecoins", "2 seats"],
-  ["Paper Route", "Day trading", "4 seats"],
-  ["Nine Lives", "Memecoins", "2 seats"],
-  ["Kervan", "Perps", "1 seat"],
-  ["The Bakery", "Memecoins", "1 seat"],
-];
-
-function Track({ hidden = false }) {
+function Track({ rooms, hidden = false }) {
   return (
     <div className="room-ticker__track" aria-hidden={hidden || undefined}>
-      {ROOMS.map(([name, trading, seats]) => (
-        <a key={`${name}-${hidden}`} href="#find" className="room-ticker__item">
-          <strong>{name}</strong>
-          <span>{trading}</span>
-          <span>{seats}</span>
+      {rooms.map((room) => (
+        <a key={`${room.id}-${hidden}`} href="#find" className="room-ticker__item">
+          <strong>{room.name}</strong>
+          <span>{room.trading}</span>
+          <span>{Math.max(0, room.seats - room.members)} open</span>
         </a>
       ))}
     </div>
   );
 }
 
-export default function LiveStrip() {
+export default function LiveStrip({ crews = [] }) {
+  const rooms = crews.length ? crews : [{ id: "fresh", name: "The board is fresh", trading: "Open the first real room", seats: 8, members: 0 }];
   return (
     <section className="room-ticker" aria-label="Open crews">
       <div className="room-ticker__label">Open rooms</div>
       <div className="room-ticker__window">
-        <Track />
-        <Track hidden />
+        <Track rooms={rooms} />
+        <Track rooms={rooms} hidden />
       </div>
     </section>
   );

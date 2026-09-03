@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
-import { CREWS } from "./data.js";
+import { matchPath, useLocation, useNavigate } from "react-router-dom";
 import Nav from "./components/Nav.jsx";
 import Hero from "./components/Hero.jsx";
 import LiveStrip from "./components/LiveStrip.jsx";
@@ -22,14 +22,15 @@ const HowItWorks = lazy(() => import("./components/HowItWorks.jsx"));
 const Safety = lazy(() => import("./components/Safety.jsx"));
 
 export default function App() {
-  const [crews, setCrews] = useState(CREWS);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [crews, setCrews] = useState([]);
   const [selected, setSelected] = useState(null);
   const [requests, setRequests] = useState(() => new Set());
   const [creating, setCreating] = useState(false);
   const [session, setSession] = useState(null);
   const [sessionReady, setSessionReady] = useState(!backendConfigured);
   const [crewsLoading, setCrewsLoading] = useState(false);
-  const [activeRoom, setActiveRoom] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
   const { soundEnabled, toggleSound } = useClickSound();
@@ -65,12 +66,13 @@ export default function App() {
       setCrews(loaded);
       setRequests(new Set(loaded.filter((crew) => crew.requested).map((crew) => crew.id)));
       setSelected((current) => current ? loaded.find((crew) => crew.id === current.id) || null : null);
-      setActiveRoom((current) => current ? loaded.find((crew) => crew.id === current.id) || current : null);
+      return loaded;
     } catch (error) {
       console.error("FNF backend could not load crews; using local data.", error);
     } finally {
       setCrewsLoading(false);
     }
+    return [];
   }, []);
 
   useEffect(() => {
@@ -80,6 +82,18 @@ export default function App() {
       active = false;
     };
   }, [session?.user?.id, refreshCrews]);
+
+  useEffect(() => {
+    if (!session) return;
+    if (location.pathname === "/" || location.pathname === "/auth/callback") navigate("/app", { replace: true });
+  }, [session, location.pathname, navigate]);
+
+  useEffect(() => {
+    const matched = matchPath("/crews/:slug", location.pathname);
+    if (!matched) return;
+    const crew = crews.find((item) => item.slug === matched.params.slug);
+    if (crew) setSelected(crew);
+  }, [location.pathname, crews]);
 
   const openAuth = useCallback(() => {
     setPendingAction(null);
@@ -130,18 +144,21 @@ export default function App() {
   }, [pendingAction]);
 
   const handleSignOut = useCallback(() => {
-    setActiveRoom(null);
+    navigate("/", { replace: true });
     signOut().catch((error) => console.error("FNF sign-out failed.", error));
-  }, []);
+  }, [navigate]);
 
   if (!sessionReady) {
     return <div className="app-boot" aria-label="Loading FNF"><span>FNF</span><i /></div>;
   }
 
-  if (session && activeRoom) {
+  const roomMatch = matchPath("/room/:slug", location.pathname);
+  const activeRoom = roomMatch ? crews.find((crew) => crew.slug === roomMatch.params.slug && crew.membershipRole) : null;
+
+  if (session && roomMatch && activeRoom) {
     return (
       <>
-        <RoomWorkspace crew={activeRoom} session={session} onLeave={() => setActiveRoom(null)} onCrewChanged={refreshCrews} />
+        <RoomWorkspace crew={activeRoom} session={session} initialChart={location.state?.chart || null} onLeave={() => navigate("/rooms")} onCrewChanged={refreshCrews} />
         <div className="grain" aria-hidden="true" />
       </>
     );
@@ -156,17 +173,17 @@ export default function App() {
           crews={crews}
           loading={crewsLoading}
           onRefresh={refreshCrews}
-          onOpenCrew={setSelected}
-          onEnterRoom={setActiveRoom}
+          onOpenCrew={(crew) => { setSelected(crew); navigate(`/crews/${crew.slug}`); }}
+          onEnterRoom={(crew, chart) => navigate(`/room/${crew.slug}`, { state: chart ? { chart } : undefined })}
           onCreate={openCreate}
           onSignOut={handleSignOut}
         />
         <CrewDrawer
           crew={selected}
-          onClose={() => setSelected(null)}
+          onClose={() => { setSelected(null); navigate("/discover"); }}
           requested={selected ? requests.has(selected.id) : false}
           onRequest={handleRequest}
-          onEnter={(crew) => { setSelected(null); setActiveRoom(crew); }}
+          onEnter={(crew) => { setSelected(null); navigate(`/room/${crew.slug}`); }}
         />
         <CreateCrew open={creating} onClose={() => setCreating(false)} onCreated={handleCreated} />
       </>
@@ -186,11 +203,11 @@ export default function App() {
       />
       <main className="w-full max-w-full overflow-x-hidden">
         <Hero onCreate={openCreate} />
-        <LiveStrip />
+        <LiveStrip crews={crews} />
         <CrewFinder
           crews={crews}
           requests={requests}
-          onOpen={setSelected}
+          onOpen={(crew) => { setSelected(crew); navigate(`/crews/${crew.slug}`); }}
           onCreate={openCreate}
         />
         <Suspense fallback={null}>
@@ -205,10 +222,10 @@ export default function App() {
 
       <CrewDrawer
         crew={selected}
-        onClose={() => setSelected(null)}
+        onClose={() => { setSelected(null); navigate("/"); }}
         requested={selected ? requests.has(selected.id) : false}
         onRequest={handleRequest}
-        onEnter={(crew) => { setSelected(null); setActiveRoom(crew); }}
+        onEnter={(crew) => { setSelected(null); navigate(`/room/${crew.slug}`); }}
       />
       <CreateCrew
         open={creating}

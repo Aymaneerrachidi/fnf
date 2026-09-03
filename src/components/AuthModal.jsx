@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { CheckCircle, SpinnerGap, X } from "@phosphor-icons/react";
-import { signIn, signUp } from "../services/auth.js";
+import { CheckCircle, DiscordLogo, SpinnerGap, X, XLogo } from "@phosphor-icons/react";
+import { signIn, signInWithSocial, signUp } from "../services/auth.js";
 import { Button, EASE, Field, inputClass } from "./ui.jsx";
 
 const EMPTY = { displayName: "", email: "", password: "" };
@@ -71,6 +71,16 @@ export default function AuthModal({ open, onClose, onAuthenticated }) {
     }
   };
 
+  const social = async (provider) => {
+    setState(`social-${provider}`);
+    setErrors({});
+    try { await signInWithSocial(provider); }
+    catch (error) {
+      setState("idle");
+      setErrors({ form: error.message || `${provider} sign-in is not configured yet.` });
+    }
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -117,6 +127,11 @@ export default function AuthModal({ open, onClose, onAuthenticated }) {
             ) : (
               <form onSubmit={submit} noValidate className="flex flex-col gap-5 p-6">
                 {errors.form && <p role="alert" className="rounded-[12px] border border-accent px-4 py-3 text-[13px] text-ink">{errors.form}</p>}
+                <div className="auth-social">
+                  <button type="button" onClick={() => social("twitter")} disabled={state !== "idle"}><XLogo weight="fill" />{state === "social-twitter" ? "Opening X…" : "Continue with X"}</button>
+                  <button type="button" onClick={() => social("discord")} disabled={state !== "idle"}><DiscordLogo weight="fill" />{state === "social-discord" ? "Opening Discord…" : "Continue with Discord"}</button>
+                </div>
+                <div className="auth-divider"><span>or create manually</span></div>
                 {mode === "signup" && (
                   <Field id="account-name" label="Display name" error={errors.displayName}>
                     <input id="account-name" ref={firstRef} className={inputClass} value={values.displayName} onChange={set("displayName")} autoComplete="name" />

@@ -37,6 +37,16 @@ export async function signIn({ email, password }) {
   return data;
 }
 
+export async function signInWithSocial(provider) {
+  const redirectTo = `${window.location.origin}/auth/callback`;
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo },
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function signOut() {
   if (!backendConfigured) return;
   const { error } = await supabase.auth.signOut();

@@ -3,10 +3,13 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CheckCircle, SpinnerGap, X } from "@phosphor-icons/react";
 import { FILTERS } from "../data.js";
 import { Button, EASE, Field, inputClass } from "./ui.jsx";
+import { uploadImage } from "../services/uploads.js";
 
 const EMPTY = {
   name: "",
   thesis: "",
+  description: "",
+  avatarUrl: "",
   trading: "Memecoins",
   lang: "English",
   hours: "Europe",
@@ -34,6 +37,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [state, setState] = useState("idle"); // idle | saving | done
+  const [image, setImage] = useState(null);
   const firstRef = useRef(null);
 
   useEffect(() => {
@@ -41,6 +45,7 @@ export default function CreateCrew({ open, onClose, onCreated }) {
     setValues(EMPTY);
     setErrors({});
     setState("idle");
+    setImage(null);
     const onKey = (e) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -69,7 +74,8 @@ export default function CreateCrew({ open, onClose, onCreated }) {
     }
     setState("saving");
     try {
-      await onCreated(values);
+      const avatarUrl = image ? await uploadImage(image, "rooms") : "";
+      await onCreated({ ...values, avatarUrl });
       setState("done");
     } catch (error) {
       setState("idle");
@@ -178,6 +184,16 @@ export default function CreateCrew({ open, onClose, onCreated }) {
                     aria-invalid={Boolean(errors.thesis)}
                   />
                 </Field>
+
+                <Field id="crew-description" label="About the room" hint={`${values.description.trim().length} of 500 characters`}>
+                  <textarea id="crew-description" rows={3} className={`${inputClass} h-auto resize-none py-3 leading-relaxed`} value={values.description} onChange={set("description")} maxLength="500" placeholder="Culture, schedule, expectations, and the kind of trader who fits." />
+                </Field>
+
+                <label className="image-picker">
+                  <span>{image ? "Room image selected" : "Add room image"}</span>
+                  <small>JPG, PNG, WebP, or GIF · up to 5 MB</small>
+                  <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => setImage(event.target.files?.[0] || null)} />
+                </label>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   {selects.map(([id, label]) => (
