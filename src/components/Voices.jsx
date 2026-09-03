@@ -14,7 +14,7 @@ const TRADERS = [
     name: "Orangie",
     handle: "@orangie",
     result: "Made $3M on-chain.",
-    image: "/assets/traders/trader-orangie-key-v3.png",
+    image: "/assets/traders/trader-orangie-key-v4.png",
     source: "https://www.tiktok.com/@clipsbykes/video/7677238495773068566?is_from_webapp=1&sender_device=pc",
   },
   {

@@ -1,5 +1,6 @@
+import { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { Check, ShieldCheck, UsersThree, X } from "@phosphor-icons/react";
+import { Check, ShieldCheck, X } from "@phosphor-icons/react";
 import { EASE } from "./ui.jsx";
 
 const TOGETHER = [
@@ -16,6 +17,23 @@ const NOT_FNF = [
 
 export default function Safety() {
   const reduce = useReducedMotion();
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      },
+      { threshold: 0.12 },
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section id="rules" className="safety-section section-space" aria-labelledby="safety-title">
@@ -26,24 +44,43 @@ export default function Safety() {
           <p>FNF is built around repeat conversations between a few traders—not a feed, a guru, or a paid promise.</p>
         </header>
 
-        <div className="trust-bento">
-          <motion.figure
-            className="trust-bento__image"
-            initial={reduce ? false : { opacity: 0, scale: 0.96 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.7, ease: EASE }}
-          >
-            <img src="/assets/fnf-glass-eight.webp" alt="Eight glass keys arranged around an open center." loading="lazy" />
-          </motion.figure>
-          <article className="trust-bento__cap">
-            <UsersThree size={30} weight="duotone" />
-            <div><h3>Eight keeps it personal.</h3><p>Past eight, the room gets noisy. FNF keeps the circle small enough for every trader to have a voice.</p></div>
-          </article>
-          <article className="trust-bento__fact"><strong>8 max</strong><span>Hard room cap</span></article>
-          <article className="trust-bento__fact"><strong>0 tiers</strong><span>No paid signals</span></article>
-          <article className="trust-bento__fact"><strong>1 room</strong><span>One shared thesis</span></article>
-        </div>
+        <motion.article
+          className="trust-hero"
+          initial={reduce ? false : { opacity: 0, scale: 0.975 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, amount: 0.22 }}
+          transition={{ duration: 0.75, ease: EASE }}
+        >
+          <video
+            ref={videoRef}
+            className="trust-hero__video"
+            src="/assets/eight-keeps-it-personal.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+            onCanPlay={(event) => {
+              if (event.currentTarget.getBoundingClientRect().top < window.innerHeight) {
+                event.currentTarget.play().catch(() => {});
+              }
+            }}
+          />
+          <div className="trust-hero__shade" aria-hidden="true" />
+          <div className="trust-hero__content">
+            <div className="trust-hero__copy">
+              <span className="pixel-kicker">THE HARD CAP</span>
+              <h3>Eight keeps it personal.</h3>
+              <p>Past eight, the room gets noisy. FNF keeps the circle small enough for every trader to have a voice.</p>
+            </div>
+            <div className="trust-hero__facts">
+              <div><strong>8 max</strong><span>Hard room cap</span></div>
+              <div><strong>0 tiers</strong><span>No paid signals</span></div>
+              <div><strong>1 room</strong><span>One shared thesis</span></div>
+            </div>
+          </div>
+        </motion.article>
 
         <div className="safety-contract">
           <motion.article

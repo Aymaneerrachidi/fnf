@@ -897,10 +897,112 @@
   color: var(--muted);
 }
 
-/* Trust bento */
+/* Trust / video feature */
 .safety-section {
   overflow: hidden;
   background: var(--bg);
+}
+
+.trust-hero {
+  position: relative;
+  min-height: clamp(620px, 63vw, 840px);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 30px;
+  background: #050506;
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.08), 0 38px 100px rgb(0 0 0 / 0.4);
+  isolation: isolate;
+}
+
+.trust-hero__video,
+.trust-hero__shade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.trust-hero__video {
+  z-index: -2;
+  object-fit: cover;
+  transform: scale(1.085);
+}
+
+.trust-hero__shade {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgb(2 2 3 / 0.9) 0%, rgb(2 2 3 / 0.54) 52%, rgb(2 2 3 / 0.14) 100%),
+    linear-gradient(0deg, rgb(2 2 3 / 0.94) 0%, transparent 46%),
+    linear-gradient(180deg, rgb(2 2 3 / 0.2), transparent 30%);
+}
+
+.trust-hero__content {
+  display: flex;
+  min-height: inherit;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 80px;
+  padding: clamp(34px, 6vw, 82px);
+}
+
+.trust-hero__copy {
+  max-width: 780px;
+}
+
+.trust-hero__copy h3 {
+  max-width: 8.6ch;
+  margin: 20px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(3.6rem, 7vw, 7.8rem);
+  font-weight: 700;
+  letter-spacing: -0.065em;
+  line-height: 0.88;
+  text-wrap: balance;
+}
+
+.trust-hero__copy p {
+  max-width: 52ch;
+  margin: 27px 0 0;
+  color: rgb(244 244 244 / 0.74);
+  font-size: clamp(16px, 1.45vw, 20px);
+  line-height: 1.6;
+}
+
+.trust-hero__facts {
+  display: grid;
+  width: min(100%, 840px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 18px;
+  background: rgb(5 5 7 / 0.56);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.07);
+  backdrop-filter: blur(18px);
+}
+
+.trust-hero__facts > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  padding: 20px 22px 23px;
+}
+
+.trust-hero__facts > div + div {
+  border-left: 1px solid rgb(255 255 255 / 0.13);
+}
+
+.trust-hero__facts strong {
+  font-family: var(--font-display);
+  font-size: clamp(25px, 2.5vw, 39px);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.trust-hero__facts span {
+  color: rgb(244 244 244 / 0.58);
+  font-family: var(--font-mono);
+  font-size: 15px;
 }
 
 .trust-bento {
@@ -1549,6 +1651,12 @@
   border-radius: 32px;
   background: linear-gradient(145deg, #111116, #070708);
   box-shadow: inset 0 1px rgb(255 255 255 / 0.05), 0 32px 110px rgb(0 0 0 / 0.48);
+}
+
+.clan-key:last-child {
+  grid-column: 1 / -1;
+  width: calc(50% - 9px);
+  justify-self: center;
 }
 
 .clan-key {
@@ -3305,12 +3413,6 @@ button:not(.crew-card__button):not(.clan-key):active {
   transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), filter 600ms ease;
 }
 
-/* Orangie's source render carries more empty space beneath the key. Reframe it
-   so all three physical keycaps share one top and bottom baseline. */
-.trader-proof:nth-child(2) .trader-proof__image img {
-  object-position: center 25%;
-}
-
 .trader-proof:hover .trader-proof__image img {
   filter: brightness(1.06);
   transform: scale(1.018);
@@ -3483,6 +3585,16 @@ button:not(.crew-card__button):not(.clan-key):active {
 }
 
 @media (max-width: 900px) {
+  .trust-hero {
+    min-height: 760px;
+  }
+
+  .trust-hero__shade {
+    background:
+      linear-gradient(90deg, rgb(2 2 3 / 0.82), rgb(2 2 3 / 0.3)),
+      linear-gradient(0deg, rgb(2 2 3 / 0.96) 0%, rgb(2 2 3 / 0.36) 68%, rgb(2 2 3 / 0.18) 100%);
+  }
+
   .process-card {
     grid-template-rows: 300px minmax(0, 1fr);
   }
@@ -3517,6 +3629,43 @@ button:not(.crew-card__button):not(.clan-key):active {
 }
 
 @media (max-width: 767px) {
+  .trust-hero {
+    min-height: 730px;
+    border-radius: 22px;
+  }
+
+  .trust-hero__content {
+    gap: 48px;
+    padding: 28px 22px 22px;
+  }
+
+  .trust-hero__copy h3 {
+    max-width: 9ch;
+    font-size: clamp(3.6rem, 17vw, 5.3rem);
+  }
+
+  .trust-hero__copy p {
+    font-size: 15px;
+  }
+
+  .trust-hero__facts {
+    grid-template-columns: 1fr;
+  }
+
+  .trust-hero__facts > div {
+    padding: 16px 18px 18px;
+  }
+
+  .trust-hero__facts > div + div {
+    border-top: 1px solid rgb(255 255 255 / 0.13);
+    border-left: 0;
+  }
+
+  .clan-key:last-child {
+    grid-column: auto;
+    width: 100%;
+  }
+
   .process-card {
     grid-template-rows: 260px minmax(0, 1fr);
   }

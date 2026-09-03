@@ -17,25 +17,18 @@ const CLANS = [
     tone: "gold",
   },
   {
-    name: "Nobi Ventures",
-    profit: "+$4.8M",
+    name: "Pioneer",
+    profit: "+$99K",
     period: "last 30 days",
-    image: "/assets/clans images/nobi ventures up 4.8m last 30 days.jpg",
-    tone: "pink",
-  },
-  {
-    name: "Dabal",
-    profit: "+$4.4M",
-    period: "last 30 days",
-    image: "/assets/clans images/dabal up 4.4m$ last 30 days.jpg",
-    tone: "purple",
+    image: "/assets/clans images/Pionner.jpg",
+    tone: "blue",
   },
   {
     name: "Grand FNF",
     profit: "+$3.6M",
     period: "last 30 days",
     image: "/assets/clans images/grand fnf up 3.6 mil last 30 days.jpg",
-    tone: "blue",
+    tone: "purple",
   },
 ];
 

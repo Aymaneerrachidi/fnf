@@ -9,7 +9,7 @@ const STEPS = [
     title: "Say how you actually trade.",
     body: "Pick memecoins, perps, or day trading. Add your language, market hours, and how social you want the room to be.",
     note: "Five inputs. No résumé.",
-    image: "/assets/process-profile-key-v4.png",
+    image: "/assets/process-profile-key-chrome-v5.png",
     className: "is-profile",
   },
   {
@@ -18,7 +18,7 @@ const STEPS = [
     title: "Read the room before you enter.",
     body: "See the room thesis, pace, language, live hours, and open seats before anybody asks to see your wallet.",
     note: "Three rooms, not three hundred.",
-    image: "/assets/process-shortlist-key-v4.png",
+    image: "/assets/process-shortlist-key-chrome-v5.png",
     className: "is-match",
   },
   {
@@ -27,7 +27,7 @@ const STEPS = [
     title: "Request the open seat.",
     body: "The room sees the same trading profile you used to match. If the fit works both ways, you are in the circle.",
     note: "No trial-week theatre.",
-    image: "/assets/process-connect-key-v4.png",
+    image: "/assets/process-connect-key-chrome-v5.png",
     className: "is-enter",
   },
 ];
