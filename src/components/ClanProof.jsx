@@ -17,18 +17,18 @@ const CLANS = [
     tone: "gold",
   },
   {
-    name: "Pioneer",
-    profit: "+$99K",
-    period: "last 30 days",
-    image: "/assets/clans images/Pionner.jpg",
-    tone: "blue",
-  },
-  {
     name: "Grand FNF",
     profit: "+$3.6M",
     period: "last 30 days",
     image: "/assets/clans images/grand fnf up 3.6 mil last 30 days.jpg",
     tone: "purple",
+  },
+  {
+    name: "Pioneer",
+    profit: "+$99K",
+    period: "last 30 days",
+    image: "/assets/clans images/Pionner.jpg",
+    tone: "blue",
   },
 ];
 
