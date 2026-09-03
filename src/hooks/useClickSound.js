@@ -25,57 +25,58 @@ export default function useClickSound() {
     const now = context.currentTime;
     const master = context.createGain();
     const compressor = context.createDynamicsCompressor();
-    master.gain.value = 0.82;
-    compressor.threshold.value = -18;
-    compressor.knee.value = 8;
-    compressor.ratio.value = 5;
-    master.connect(compressor).connect(context.destination);
+    const panner = context.createStereoPanner?.();
+    master.gain.value = 1.08;
+    compressor.threshold.value = -12;
+    compressor.knee.value = 10;
+    compressor.ratio.value = 8;
+    compressor.attack.value = 0.001;
+    compressor.release.value = 0.055;
+    if (panner) {
+      panner.pan.value = (Math.random() - 0.5) * 0.12;
+      master.connect(panner).connect(compressor).connect(context.destination);
+    } else {
+      master.connect(compressor).connect(context.destination);
+    }
 
-    // Bright switch contact: the short upper-frequency snap of a mechanical key.
-    const click = context.createOscillator();
-    const clickGain = context.createGain();
-    click.type = "triangle";
-    click.frequency.setValueAtTime(2350, now);
-    click.frequency.exponentialRampToValueAtTime(860, now + 0.012);
-    clickGain.gain.setValueAtTime(0.0001, now);
-    clickGain.gain.exponentialRampToValueAtTime(0.052, now + 0.0015);
-    clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.018);
-    click.connect(clickGain).connect(master);
-
-    // A tiny lower body keeps the sound physical instead of becoming a UI beep.
-    const body = context.createOscillator();
-    const bodyGain = context.createGain();
-    body.type = "sine";
-    body.frequency.setValueAtTime(310, now);
-    body.frequency.exponentialRampToValueAtTime(175, now + 0.034);
-    bodyGain.gain.setValueAtTime(0.0001, now);
-    bodyGain.gain.exponentialRampToValueAtTime(0.026, now + 0.002);
-    bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
-    body.connect(bodyGain).connect(master);
-
-    const samples = Math.max(1, Math.floor(context.sampleRate * 0.032));
+    // One short physical impulse feeds two resonances: switch contact and case.
+    // Avoiding a pitched oscillator keeps this in mechanical-key territory.
+    const duration = 0.06;
+    const samples = Math.max(1, Math.floor(context.sampleRate * duration));
     const buffer = context.createBuffer(1, samples, context.sampleRate);
     const channel = buffer.getChannelData(0);
     for (let sample = 0; sample < samples; sample += 1) {
-      const envelope = Math.pow(1 - sample / samples, 2.4);
-      channel[sample] = (Math.random() * 2 - 1) * envelope;
+      const progress = sample / samples;
+      const envelope = Math.pow(1 - progress, 3.6);
+      const bottomOut = Math.exp(-Math.pow((progress - 0.11) / 0.028, 2));
+      channel[sample] = (Math.random() * 2 - 1) * (envelope + bottomOut * 0.72);
     }
-    const noise = context.createBufferSource();
-    const filter = context.createBiquadFilter();
-    const noiseGain = context.createGain();
-    noise.buffer = buffer;
-    filter.type = "bandpass";
-    filter.frequency.value = 3400;
-    filter.Q.value = 0.75;
-    noiseGain.gain.setValueAtTime(0.062, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.031);
-    noise.connect(filter).connect(noiseGain).connect(master);
 
-    click.start(now);
-    body.start(now);
-    noise.start(now);
-    click.stop(now + 0.02);
-    body.stop(now + 0.05);
+    const source = context.createBufferSource();
+    const contact = context.createBiquadFilter();
+    const contactGain = context.createGain();
+    const caseFilter = context.createBiquadFilter();
+    const caseGain = context.createGain();
+    const pitchJitter = 0.96 + Math.random() * 0.08;
+
+    source.buffer = buffer;
+    source.playbackRate.value = pitchJitter;
+
+    contact.type = "highpass";
+    contact.frequency.value = 2150 + Math.random() * 420;
+    contact.Q.value = 0.72;
+    contactGain.gain.setValueAtTime(0.34, now);
+    contactGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.022);
+
+    caseFilter.type = "bandpass";
+    caseFilter.frequency.value = 620 + Math.random() * 95;
+    caseFilter.Q.value = 0.95;
+    caseGain.gain.setValueAtTime(0.23, now);
+    caseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.058);
+
+    source.connect(contact).connect(contactGain).connect(master);
+    source.connect(caseFilter).connect(caseGain).connect(master);
+    source.start(now);
   }, [enabled]);
 
   useEffect(() => {

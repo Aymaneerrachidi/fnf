@@ -9,8 +9,8 @@ export default function Hero({ onCreate }) {
   return (
     <section id="top" className="hero-section relative isolate min-h-[100dvh] overflow-hidden">
       <motion.img
-        src="/assets/fnf-brand-hero-v2.png"
-        alt="Glossy retro-futurist keycaps gathered around a shared trading console."
+        src="/assets/fnf-brand-hero-chrome-v3.png"
+        alt="Chrome trading keycaps gathered around a shared crew table."
         className="hero-media"
         loading="eager"
         fetchPriority="high"
