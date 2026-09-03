@@ -12,7 +12,7 @@ export default function useClickSound() {
   });
   const contextRef = useRef(null);
 
-  const play = useCallback(() => {
+  const play = useCallback((phase = "down") => {
     if (!enabled) return;
 
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -23,13 +23,14 @@ export default function useClickSound() {
     if (context.state === "suspended") context.resume();
 
     const now = context.currentTime;
+    const isRelease = phase === "up";
     const master = context.createGain();
     const compressor = context.createDynamicsCompressor();
     const panner = context.createStereoPanner?.();
-    master.gain.value = 1.08;
-    compressor.threshold.value = -12;
-    compressor.knee.value = 10;
-    compressor.ratio.value = 8;
+    master.gain.value = isRelease ? 1.08 : 1.62;
+    compressor.threshold.value = -15;
+    compressor.knee.value = 12;
+    compressor.ratio.value = 10;
     compressor.attack.value = 0.001;
     compressor.release.value = 0.055;
     if (panner) {
@@ -41,15 +42,17 @@ export default function useClickSound() {
 
     // One short physical impulse feeds two resonances: switch contact and case.
     // Avoiding a pitched oscillator keeps this in mechanical-key territory.
-    const duration = 0.06;
+    const duration = isRelease ? 0.038 : 0.072;
     const samples = Math.max(1, Math.floor(context.sampleRate * duration));
     const buffer = context.createBuffer(1, samples, context.sampleRate);
     const channel = buffer.getChannelData(0);
     for (let sample = 0; sample < samples; sample += 1) {
       const progress = sample / samples;
-      const envelope = Math.pow(1 - progress, 3.6);
-      const bottomOut = Math.exp(-Math.pow((progress - 0.11) / 0.028, 2));
-      channel[sample] = (Math.random() * 2 - 1) * (envelope + bottomOut * 0.72);
+      const envelope = Math.pow(1 - progress, isRelease ? 5.2 : 3.4);
+      const impactAt = isRelease ? 0.045 : 0.105;
+      const impactWidth = isRelease ? 0.022 : 0.03;
+      const impact = Math.exp(-Math.pow((progress - impactAt) / impactWidth, 2));
+      channel[sample] = (Math.random() * 2 - 1) * (envelope + impact * (isRelease ? 0.38 : 0.86));
     }
 
     const source = context.createBufferSource();
@@ -57,34 +60,75 @@ export default function useClickSound() {
     const contactGain = context.createGain();
     const caseFilter = context.createBiquadFilter();
     const caseGain = context.createGain();
-    const pitchJitter = 0.96 + Math.random() * 0.08;
+    const pitchJitter = 0.94 + Math.random() * 0.12;
 
     source.buffer = buffer;
     source.playbackRate.value = pitchJitter;
 
     contact.type = "highpass";
-    contact.frequency.value = 2150 + Math.random() * 420;
-    contact.Q.value = 0.72;
-    contactGain.gain.setValueAtTime(0.34, now);
-    contactGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.022);
+    contact.frequency.value = (isRelease ? 3150 : 1950) + Math.random() * 520;
+    contact.Q.value = isRelease ? 0.9 : 0.68;
+    contactGain.gain.setValueAtTime(isRelease ? 0.3 : 0.52, now);
+    contactGain.gain.exponentialRampToValueAtTime(0.0001, now + (isRelease ? 0.017 : 0.027));
 
     caseFilter.type = "bandpass";
-    caseFilter.frequency.value = 620 + Math.random() * 95;
-    caseFilter.Q.value = 0.95;
-    caseGain.gain.setValueAtTime(0.23, now);
-    caseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.058);
+    caseFilter.frequency.value = (isRelease ? 980 : 510) + Math.random() * 115;
+    caseFilter.Q.value = isRelease ? 1.2 : 0.88;
+    caseGain.gain.setValueAtTime(isRelease ? 0.12 : 0.36, now);
+    caseGain.gain.exponentialRampToValueAtTime(0.0001, now + (isRelease ? 0.031 : 0.07));
 
     source.connect(contact).connect(contactGain).connect(master);
     source.connect(caseFilter).connect(caseGain).connect(master);
+
+    // Short damped case modes add the wood/plastic body heard in a real board.
+    const modes = isRelease
+      ? [[910, 0.022, 0.028], [1710, 0.014, 0.018]]
+      : [[118, 0.055, 0.065], [690, 0.034, 0.043], [1320, 0.018, 0.026]];
+    modes.forEach(([frequency, level, decay]) => {
+      const mode = context.createOscillator();
+      const modeGain = context.createGain();
+      mode.type = "sine";
+      mode.frequency.value = frequency * pitchJitter;
+      modeGain.gain.setValueAtTime(level, now);
+      modeGain.gain.exponentialRampToValueAtTime(0.0001, now + decay);
+      mode.connect(modeGain).connect(master);
+      mode.start(now);
+      mode.stop(now + decay + 0.004);
+    });
+
     source.start(now);
   }, [enabled]);
 
   useEffect(() => {
-    const handlePointer = (event) => {
-      if (event.target.closest(INTERACTIVE)) play();
+    const getControl = (event) => event.target.closest?.(INTERACTIVE);
+    const handlePointerDown = (event) => {
+      const control = getControl(event);
+      if (control && !control.matches(":disabled, [aria-disabled='true']")) play("down");
     };
-    document.addEventListener("pointerdown", handlePointer, true);
-    return () => document.removeEventListener("pointerdown", handlePointer, true);
+    const handlePointerUp = (event) => {
+      const control = getControl(event);
+      if (control && !control.matches(":disabled, [aria-disabled='true']")) play("up");
+    };
+    const handleKeyDown = (event) => {
+      if (event.repeat || !["Enter", " "].includes(event.key)) return;
+      const control = getControl(event);
+      if (control && !control.matches(":disabled, [aria-disabled='true']")) play("down");
+    };
+    const handleKeyUp = (event) => {
+      if (!["Enter", " "].includes(event.key)) return;
+      const control = getControl(event);
+      if (control && !control.matches(":disabled, [aria-disabled='true']")) play("up");
+    };
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    document.addEventListener("pointerup", handlePointerUp, true);
+    document.addEventListener("keydown", handleKeyDown, true);
+    document.addEventListener("keyup", handleKeyUp, true);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+      document.removeEventListener("pointerup", handlePointerUp, true);
+      document.removeEventListener("keydown", handleKeyDown, true);
+      document.removeEventListener("keyup", handleKeyUp, true);
+    };
   }, [play]);
 
   const toggle = useCallback(() => {
