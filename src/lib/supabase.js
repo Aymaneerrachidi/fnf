@@ -3,8 +3,15 @@ import { createClient } from "@supabase/supabase-js";
 const productionUrl = "https://rngoiswvuhoqtlfbhxpw.supabase.co";
 const productionPublishableKey = "sb_publishable_umzjilX3k5UqCZBCZH9HvQ_xEPWt5PX";
 
-export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim()
+const configuredUrl = import.meta.env.VITE_SUPABASE_URL?.trim()
   || (import.meta.env.PROD ? productionUrl : undefined);
+
+// Browsers on some local networks block direct *.supabase.co requests. During
+// development Vite forwards the complete Supabase surface through one origin,
+// including Auth, PostgREST, Storage, Functions and Realtime.
+export const supabaseUrl = import.meta.env.DEV && configuredUrl
+  ? `${window.location.origin}/supabase`
+  : configuredUrl;
 export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim()
   || (import.meta.env.PROD ? productionPublishableKey : undefined);
 

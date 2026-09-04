@@ -29,10 +29,12 @@ export async function signUp({ displayName, email, password }) {
 }
 
 export async function signIn({ email, password }) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email.trim(),
-    password,
-  });
+  const credentials = { email: email.trim(), password };
+  let { data, error } = await supabase.auth.signInWithPassword(credentials);
+  if (error && /failed to fetch|network request failed/i.test(error.message || "")) {
+    await new Promise((resolve) => window.setTimeout(resolve, 650));
+    ({ data, error } = await supabase.auth.signInWithPassword(credentials));
+  }
   if (error) throw error;
   return data;
 }

@@ -23,6 +23,13 @@ function toCrew(row) {
     requestStatus: row.my_request_status || null,
     membershipRole: row.membership_role || null,
     pendingRequests: Number(row.pending_request_count ?? 0),
+    accent: row.accent || "#ff3bbe",
+    manifesto: row.manifesto || "",
+    emoji: row.crew_emoji || "⌁",
+    rituals: row.rituals || "",
+    applicationQuestion: row.application_question || "Why this room?",
+    inviteCode: row.invite_code || null,
+    publicPreview: row.public_preview ?? true,
     lead: {
       name: row.owner_name || "FNF trader",
       handle: row.owner_handle || "member",
@@ -85,13 +92,16 @@ export async function createCrew(values) {
   return toCrew(data[0]);
 }
 
-export async function requestSeat(crewId) {
+export async function requestSeat(crewId, application = {}) {
   if (!backendConfigured) return { crewId, status: "pending" };
 
   await ensureSession();
-  const { data, error } = await supabase.rpc("request_seat", {
+  const { data, error } = await supabase.rpc("request_seat_profiled", {
     p_crew_id: crewId,
-    p_note: null,
+    p_note: application.note || null,
+    p_availability: application.availability || "",
+    p_contribution: application.contribution || "",
+    p_intro_url: application.introUrl || null,
   });
   if (error) throw error;
 
@@ -134,6 +144,12 @@ export async function updateCrew(crewId, values) {
     market_hours: values.hours,
     voice_preference: values.voice,
     capacity: Number(values.seats),
+    accent: values.accent || "#ff3bbe",
+    manifesto: values.manifesto?.trim() || "",
+    crew_emoji: values.emoji || "⌁",
+    rituals: values.rituals?.trim() || "",
+    application_question: values.applicationQuestion?.trim() || "Why this room?",
+    public_preview: values.publicPreview ?? true,
   };
   const { error } = await supabase.from("crews").update(changes).eq("id", crewId).eq("owner_id", session.user.id);
   if (error) throw error;

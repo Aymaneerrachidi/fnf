@@ -100,6 +100,23 @@ export default function App() {
     setAuthOpen(true);
   }, []);
 
+  const closeAuth = useCallback(() => {
+    setAuthOpen(false);
+    setPendingAction(null);
+  }, []);
+
+  const closeCreate = useCallback(() => setCreating(false), []);
+
+  const closeCrew = useCallback(() => {
+    setSelected(null);
+    navigate(session ? "/discover" : "/");
+  }, [navigate, session]);
+
+  const enterCrew = useCallback((crew) => {
+    setSelected(null);
+    navigate(`/room/${crew.slug}`);
+  }, [navigate]);
+
   const openCreate = useCallback(() => {
     if (backendConfigured && !session) {
       setPendingAction({ type: "create" });
@@ -116,13 +133,13 @@ export default function App() {
     return crew;
   }, []);
 
-  const handleRequest = useCallback(async (id) => {
+  const handleRequest = useCallback(async (id, application = {}) => {
     if (backendConfigured && !session) {
-      setPendingAction({ type: "request", id });
+      setPendingAction({ type: "request", id, application });
       setAuthOpen(true);
       throw new AuthRequiredError();
     }
-    await requestSeat(id);
+    await requestSeat(id, application);
     setRequests((prev) => new Set(prev).add(id));
     return true;
   }, [session]);
@@ -135,7 +152,7 @@ export default function App() {
     if (action?.type === "create") setCreating(true);
     if (action?.type === "request") {
       try {
-        await requestSeat(action.id);
+        await requestSeat(action.id, action.application || {});
         setRequests((prev) => new Set(prev).add(action.id));
       } catch (error) {
         console.error("Pending seat request failed after sign-in.", error);
@@ -180,12 +197,12 @@ export default function App() {
         />
         <CrewDrawer
           crew={selected}
-          onClose={() => { setSelected(null); navigate("/discover"); }}
+          onClose={closeCrew}
           requested={selected ? requests.has(selected.id) : false}
           onRequest={handleRequest}
-          onEnter={(crew) => { setSelected(null); navigate(`/room/${crew.slug}`); }}
+          onEnter={enterCrew}
         />
-        <CreateCrew open={creating} onClose={() => setCreating(false)} onCreated={handleCreated} />
+        <CreateCrew open={creating} onClose={closeCreate} onCreated={handleCreated} />
       </>
     );
   }
@@ -222,22 +239,19 @@ export default function App() {
 
       <CrewDrawer
         crew={selected}
-        onClose={() => { setSelected(null); navigate("/"); }}
+        onClose={closeCrew}
         requested={selected ? requests.has(selected.id) : false}
         onRequest={handleRequest}
-        onEnter={(crew) => { setSelected(null); navigate(`/room/${crew.slug}`); }}
+        onEnter={enterCrew}
       />
       <CreateCrew
         open={creating}
-        onClose={() => setCreating(false)}
+        onClose={closeCreate}
         onCreated={handleCreated}
       />
       <AuthModal
         open={authOpen}
-        onClose={() => {
-          setAuthOpen(false);
-          setPendingAction(null);
-        }}
+        onClose={closeAuth}
         onAuthenticated={handleAuthenticated}
       />
     </>

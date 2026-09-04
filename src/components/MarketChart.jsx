@@ -1,14 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CandlestickSeries, ColorType, CrosshairMode, createChart } from "lightweight-charts";
-import { ArrowSquareOut, MagnifyingGlass, PaperPlaneTilt, ShieldCheck, ShieldWarning, SpinnerGap, TrendUp, UsersThree, WarningOctagon } from "@phosphor-icons/react";
+import { ArrowSquareOut, Copy, MagnifyingGlass, PaperPlaneTilt, ShieldCheck, ShieldWarning, SpinnerGap, TrendUp, UsersThree, WarningOctagon } from "@phosphor-icons/react";
 import { getPoolCandles, resolveContract } from "../services/marketData.js";
 
 const compactMoney = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 2 });
-const NETWORK_LABELS = { solana: "Solana", base: "Base", bsc: "BNB Chain", robinhood: "Robinhood" };
+export const NETWORK_LABELS = { solana: "Solana", base: "Base", bsc: "BNB Chain", robinhood: "Robinhood" };
+const TIMEFRAMES = [
+  { label: "1m", timeframe: "minute", aggregate: 1, limit: 300 },
+  { label: "5m", timeframe: "minute", aggregate: 5, limit: 300 },
+  { label: "15m", timeframe: "minute", aggregate: 15, limit: 300 },
+  { label: "1h", timeframe: "hour", aggregate: 1, limit: 300 },
+  { label: "4h", timeframe: "hour", aggregate: 4, limit: 300 },
+  { label: "1d", timeframe: "day", aggregate: 1, limit: 300 },
+];
 const SOLANA_ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const EVM_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
 
-function normalizePair(pair, searchedAddress, security = {}) {
+export function normalizePair(pair, searchedAddress, security = {}) {
   const same = (a, b) => pair.chainId === "solana" ? a === b : a?.toLowerCase() === b?.toLowerCase();
   const token = same(pair.quoteToken?.address, searchedAddress) ? pair.quoteToken : pair.baseToken;
   const quote = token === pair.baseToken ? pair.quoteToken : pair.baseToken;
@@ -28,6 +36,12 @@ function normalizePair(pair, searchedAddress, security = {}) {
     change: Number(pair.priceChange?.h24 || 0),
     liquidity: Number(pair.liquidity?.usd || 0),
     volume: Number(pair.volume?.h24 || 0),
+    buys: Number(pair.txns?.h24?.buys || 0),
+    sells: Number(pair.txns?.h24?.sells || 0),
+    pairCreatedAt: pair.pairCreatedAt || null,
+    imageUrl: pair.info?.imageUrl || null,
+    websites: pair.info?.websites || [],
+    socials: pair.info?.socials || [],
     security: security[pair.chainId] || { status: "unknown", label: "Risk scan unavailable", reasons: [] },
   };
 }
@@ -40,7 +54,7 @@ function RiskStatus({ report }) {
   </div>;
 }
 
-export default function MarketChart({ onShare, onDirectShare, members = [], externalChart }) {
+export default function MarketChart({ onShare, onDirectShare, onPairChange, members = [], externalChart, initialAddress = "", className = "" }) {
   const hostRef = useRef(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -50,16 +64,18 @@ export default function MarketChart({ onShare, onDirectShare, members = [], exte
   const [error, setError] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
   const [resultsOpen, setResultsOpen] = useState(false);
+  const [timeframe, setTimeframe] = useState(TIMEFRAMES[1]);
 
   const choosePair = async (nextPair, closeResults = true) => {
     setPair(nextPair);
+    onPairChange?.(nextPair);
     if (closeResults) setResultsOpen(false);
     setCandles([]);
     setError("");
     if (nextPair.security?.status === "blocked") { setStatus("blocked"); return; }
     setStatus("loading");
     try {
-      const payload = await getPoolCandles(nextPair.address, nextPair.network, "minute", 5, 240);
+      const payload = await getPoolCandles(nextPair.address, nextPair.network, timeframe.timeframe, timeframe.aggregate, timeframe.limit);
       const list = payload?.data?.attributes?.ohlcv_list || [];
       const marketCapScale = nextPair.price > 0 && nextPair.marketCap > 0 ? nextPair.marketCap / nextPair.price : 1;
       setCandles(list.map(([time, open, high, low, close]) => ({ time: Number(time), open: Number(open) * marketCapScale, high: Number(high) * marketCapScale, low: Number(low) * marketCapScale, close: Number(close) * marketCapScale })).sort((a, b) => a.time - b.time));
@@ -68,6 +84,27 @@ export default function MarketChart({ onShare, onDirectShare, members = [], exte
       setCandles([]); setError(cause.message || "This chart could not be loaded."); setStatus("error");
     }
   };
+
+  useEffect(() => {
+    if (!pair || pair.security?.status === "blocked") return;
+    choosePair(pair);
+  }, [timeframe.label]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!initialAddress || initialAddress === query) return;
+    setQuery(initialAddress);
+    const timer = window.setTimeout(async () => {
+      setStatus("searching"); setError("");
+      try {
+        const payload = await resolveContract(initialAddress);
+        const found = (payload.pairs || []).map((item) => normalizePair(item, payload.address, payload.security)).sort((a, b) => b.liquidity - a.liquidity);
+        setResults(found);
+        if (found[0]) await choosePair(found[0]);
+        else { setStatus("idle"); setError("No indexed pool exists for this exact contract."); }
+      } catch (cause) { setStatus("error"); setError(cause.message || "Contract lookup is unavailable."); }
+    }, 40);
+    return () => window.clearTimeout(timer);
+  }, [initialAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const runSearch = async () => {
     const address = query.trim();
@@ -120,14 +157,14 @@ export default function MarketChart({ onShare, onDirectShare, members = [], exte
 
   const marketCap = useMemo(() => pair?.marketCap ? `$${compactMoney.format(pair.marketCap)}` : "—", [pair]);
 
-  return <section className="market-desk" aria-label="Multi-chain contract chart">
+  return <section className={`market-desk ${className}`} aria-label="Multi-chain contract chart">
     <div className="market-terminal-label"><span><i />FNF EXACT CA TERMINAL</span><small>Solana · Base · BNB · Robinhood</small></div>
     <header className="market-desk__bar">
       <div className="market-symbol"><span className="market-symbol__icon"><TrendUp size={16} weight="bold" /></span><div><strong>{pair ? `${pair.symbol} / ${pair.quote}` : "Paste a contract address"}</strong><small>{pair ? `${NETWORK_LABELS[pair.network] || pair.network} · ${pair.dex}` : "One field. The chain resolves automatically."}</small></div></div>
       {pair && <div className="market-price"><small>MC</small><strong>{marketCap}</strong><span className={pair.change >= 0 ? "is-up" : "is-down"}>{pair.change >= 0 ? "+" : ""}{pair.change.toFixed(2)}%</span></div>}
       <form className="market-search" onSubmit={(event) => { event.preventDefault(); runSearch(); }}><MagnifyingGlass size={15} weight="bold" /><input aria-label="Search exact contract address" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Paste Solana or 0x contract address" autoComplete="off" spellCheck="false" /><button type="submit" aria-label="Resolve contract"><span>↵</span></button>{resultsOpen && results.length > 1 && <div className="market-results"><header><b>Exact contract found on {new Set(results.map((item) => item.network)).size} chain(s)</b><small>Best liquidity selected</small></header>{results.slice(0, 10).map((item) => <button key={item.id} type="button" className={pair?.id === item.id ? "active" : ""} onClick={() => choosePair(item)}><span><b>{item.symbol} / {item.quote}</b><small>{NETWORK_LABELS[item.network]} · {item.dex}</small></span><em>${compactMoney.format(item.liquidity)} liq</em></button>)}</div>}</form>
     </header>
-    {pair && <div className="market-desk__meta"><span>{NETWORK_LABELS[pair.network] || pair.network}</span><span>5m candles</span><span>24h vol ${compactMoney.format(pair.volume)}</span><span>liquidity ${compactMoney.format(pair.liquidity)}</span>{results.length > 1 && <button type="button" onClick={() => setResultsOpen((value) => !value)}>{results.length} exact pools</button>}{pair.url && <a href={pair.url} target="_blank" rel="noreferrer">Open market <ArrowSquareOut /></a>}<RiskStatus report={pair.security} />{pair.security?.status !== "blocked" && <div className="market-share"><button type="button" onClick={() => onShare?.(pair)}><PaperPlaneTilt />Post to room</button>{members.length > 0 && <button type="button" onClick={() => setShareOpen((value) => !value)}><UsersThree />Show online friend</button>}{shareOpen && <div className="market-share__menu"><strong>Send this live chart to</strong>{members.map((member) => <button key={member.user_id} type="button" onClick={() => { onDirectShare?.(member, pair); setShareOpen(false); }}>{member.avatar_url ? <img src={member.avatar_url} alt="" /> : <span>{member.display_name.slice(0, 2).toUpperCase()}</span>}<div><b>{member.display_name}</b><small>@{member.handle}</small></div></button>)}</div>}</div>}</div>}
+    {pair && <><div className="market-desk__meta"><span>{NETWORK_LABELS[pair.network] || pair.network}</span><span>{timeframe.label} candles</span><span>24h vol ${compactMoney.format(pair.volume)}</span><span>liquidity ${compactMoney.format(pair.liquidity)}</span><span>{pair.buys} buys / {pair.sells} sells</span>{results.length > 1 && <button type="button" onClick={() => setResultsOpen((value) => !value)}>{results.length} exact pools</button>}<button type="button" onClick={() => navigator.clipboard?.writeText(pair.tokenAddress)}><Copy /> Copy CA</button>{pair.url && <a href={pair.url} target="_blank" rel="noreferrer">Source <ArrowSquareOut /></a>}<RiskStatus report={pair.security} />{pair.security?.status !== "blocked" && <div className="market-share"><button type="button" onClick={() => onShare?.(pair)}><PaperPlaneTilt />Post to room</button>{members.length > 0 && <button type="button" onClick={() => setShareOpen((value) => !value)}><UsersThree />Show online friend</button>}{shareOpen && <div className="market-share__menu"><strong>Send this live chart to</strong>{members.map((member) => <button key={member.user_id} type="button" onClick={() => { onDirectShare?.(member, pair); setShareOpen(false); }}>{member.avatar_url ? <img src={member.avatar_url} alt="" /> : <span>{member.display_name.slice(0, 2).toUpperCase()}</span>}<div><b>{member.display_name}</b><small>@{member.handle}</small></div></button>)}</div>}</div>}</div><div className="market-timeframes" aria-label="Chart timeframe">{TIMEFRAMES.map((item) => <button type="button" key={item.label} className={timeframe.label === item.label ? "active" : ""} onClick={() => setTimeframe(item)}>{item.label}</button>)}</div></>}
     <div className="market-chart" ref={hostRef}>
       {(status === "loading" || status === "searching") && <div className="market-state"><SpinnerGap className="animate-spin" size={22} />{status === "searching" ? "Resolving exact contract and scanning risk…" : "Loading live candles…"}</div>}
       {status === "idle" && !error && <div className="market-state market-state--empty"><MagnifyingGlass size={27} /><b>CA only. No ticker guessing.</b><span>Paste the full token contract. FNF checks exact pools across all four networks, then opens the deepest market.</span></div>}

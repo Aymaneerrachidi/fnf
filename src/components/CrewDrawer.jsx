@@ -30,11 +30,13 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest, onEnte
   const desktop = useIsDesktop();
   const [state, setState] = useState("idle"); // idle | sending | sent
   const [error, setError] = useState("");
+  const [application, setApplication] = useState({ note: "", availability: "", contribution: "", introUrl: "" });
   const closeRef = useRef(null);
 
   useEffect(() => {
     setState(requested ? "sent" : "idle");
     setError("");
+    setApplication({ note: "", availability: "", contribution: "", introUrl: "" });
   }, [crew, requested]);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest, onEnte
     setState("sending");
     setError("");
     try {
-      await onRequest(crew.id);
+      await onRequest(crew.id, application);
       setState("sent");
     } catch (requestError) {
       setState("idle");
@@ -183,13 +185,12 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest, onEnte
                   </p>
                 </div>
               ) : (
-                <Button
-                  variant="volt"
-                  size="lg"
-                  className="w-full"
-                  onClick={send}
-                  disabled={state === "sending"}
-                >
+                <form className="crew-application" onSubmit={(event) => { event.preventDefault(); send(); }}>
+                  <div><span>PERSON, NOT RÉSUMÉ</span><strong>{crew.applicationQuestion || "Why this room?"}</strong></div>
+                  <textarea value={application.note} onChange={(event) => setApplication((value) => ({ ...value, note: event.target.value }))} maxLength="500" rows="3" placeholder="Why does this crew fit how you communicate?" required />
+                  <div className="crew-application__split"><input value={application.availability} onChange={(event) => setApplication((value) => ({ ...value, availability: event.target.value }))} maxLength="160" placeholder="When are you usually around?" required /><input value={application.contribution} onChange={(event) => setApplication((value) => ({ ...value, contribution: event.target.value }))} maxLength="280" placeholder="What do you bring to the room?" required /></div>
+                  <input type="url" value={application.introUrl} onChange={(event) => setApplication((value) => ({ ...value, introUrl: event.target.value }))} placeholder="Optional 20-second intro link" />
+                  <Button variant="volt" size="lg" className="w-full" type="submit" disabled={state === "sending"}>
                   {state === "sending" ? (
                     <>
                       <SpinnerGap size={17} weight="bold" className="animate-spin" />
@@ -198,7 +199,8 @@ export default function CrewDrawer({ crew, onClose, requested, onRequest, onEnte
                   ) : (
                     "Request a seat"
                   )}
-                </Button>
+                  </Button>
+                </form>
               )}
             </footer>
           </motion.aside>

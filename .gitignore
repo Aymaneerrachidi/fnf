@@ -12,6 +12,7 @@ dist/
 audit-*.png
 audit-current-*.png
 chrome-audit-*/
+test-results/
 vite-*.log
 social crypto.png
 /audits/
