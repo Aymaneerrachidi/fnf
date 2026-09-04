@@ -13,30 +13,35 @@ export async function loadProfile() {
 
 export async function saveProfile(values) {
   const session = await ensureSession();
+  const savedAt = new Date().toISOString();
+  const profileValues = {
+    display_name: values.displayName.trim(),
+    handle: values.handle.trim().toLowerCase(),
+    avatar_url: values.avatarUrl || null,
+    social_url: values.socialUrl?.trim() || null,
+    x_url: values.xUrl?.trim() || null,
+    discord_handle: values.discordHandle?.trim() || "",
+    location: values.location?.trim() || "",
+    availability_status: values.availability || "open",
+    last_seen_at: savedAt,
+  };
+  const tradingValues = {
+    trading: values.trading,
+    language: values.language,
+    market_hours: values.hours,
+    voice_preference: values.voice,
+    bio: values.bio.trim(),
+    experience_level: values.experience || "Active",
+    communication_style: values.communicationStyle || "Balanced",
+    languages: values.languages?.length ? values.languages : [values.language],
+  };
   const [{ error: profileError }, { error: tradingError }] = await Promise.all([
-    supabase.from("profiles").update({
-      display_name: values.displayName.trim(),
-      handle: values.handle.trim().toLowerCase(),
-      avatar_url: values.avatarUrl || null,
-      social_url: values.socialUrl?.trim() || null,
-      x_url: values.xUrl?.trim() || null,
-      discord_handle: values.discordHandle?.trim() || "",
-      location: values.location?.trim() || "",
-      availability_status: values.availability || "open",
-      last_seen_at: new Date().toISOString(),
-    }).eq("id", session.user.id),
-    supabase.from("trading_profiles").update({
-      trading: values.trading,
-      language: values.language,
-      market_hours: values.hours,
-      voice_preference: values.voice,
-      bio: values.bio.trim(),
-      experience_level: values.experience || "Active",
-      communication_style: values.communicationStyle || "Balanced",
-      languages: values.languages?.length ? values.languages : [values.language],
-    }).eq("user_id", session.user.id),
+    supabase.from("profiles").update(profileValues).eq("id", session.user.id),
+    supabase.from("trading_profiles").update(tradingValues).eq("user_id", session.user.id),
   ]);
   if (profileError) throw profileError;
   if (tradingError) throw tradingError;
-  return loadProfile();
+  // Both updates already succeeded. Returning their merged canonical shape avoids
+  // an unnecessary second read and keeps the save interaction immediate.
+  return { ...profileValues, ...tradingValues, email: session.user.email };
 }

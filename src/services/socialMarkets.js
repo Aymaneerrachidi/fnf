@@ -1,4 +1,5 @@
 import { ensureSession, supabase } from "../lib/supabase.js";
+import { resolveContract } from "./marketData.js";
 
 function marketRow(pair, extra = {}) {
   return {
@@ -49,6 +50,33 @@ export async function deleteTokenAlert(id) {
   const session = await ensureSession();
   const { error } = await supabase.from("token_alerts").delete().eq("id", id).eq("user_id", session.user.id);
   if (error) throw error;
+}
+
+export async function checkTokenAlerts() {
+  const alerts = (await loadTokenAlerts()).filter((alert) => alert.active);
+  if (!alerts.length) return;
+  await Promise.allSettled(alerts.map(async (alert) => {
+    const payload = await resolveContract(alert.token_address);
+    const pairs = (payload.pairs || []).filter((pair) => pair.chainId === alert.network);
+    const pair = pairs.sort((a, b) => Number(b.liquidity?.usd || 0) - Number(a.liquidity?.usd || 0))[0];
+    const current = Number(pair?.marketCap || pair?.fdv || 0);
+    if (!current) return;
+    const crossed = alert.direction === "above" ? current >= Number(alert.threshold) : current <= Number(alert.threshold);
+    if (!crossed) return;
+    const marker = `fnf-market-alert:${alert.id}:${alert.threshold}`;
+    if (localStorage.getItem(marker)) return;
+    const { error } = await supabase.rpc("trigger_my_market_alert", { p_alert_id: alert.id, p_current_market_cap: current });
+    if (error) {
+      // Local fallback keeps MVP alerts useful before the newest database migration
+      // reaches an environment; the persisted RPC remains the production path.
+      localStorage.setItem(marker, "1");
+      window.dispatchEvent(new CustomEvent("fnf:market-alert", { detail: {
+        id: marker, type: "market_alert", title: `${alert.symbol} market-cap alert`,
+        body: `${alert.symbol} crossed ${alert.direction} $${new Intl.NumberFormat("en", { notation: "compact" }).format(alert.threshold)} MC.`,
+        payload: { network: alert.network, token_address: alert.token_address }, created_at: new Date().toISOString(), read_at: null,
+      } }));
+    }
+  }));
 }
 
 export async function loadTokenActivity(network, tokenAddress) {

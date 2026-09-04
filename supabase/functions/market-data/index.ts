@@ -36,6 +36,13 @@ function summarizeSecurity(payload: Record<string, unknown> | null, network: str
   const critical: string[] = [];
   const caution: string[] = [];
   const nested = (key: string) => isOne((payload[key] as Record<string, unknown> | undefined)?.status);
+  const holderRows = Array.isArray(payload.holders) ? payload.holders as Array<Record<string, unknown>> : [];
+  const rawTopTen = holderRows.slice(0, 10).reduce((sum, holder) => sum + Number(holder.percent || holder.percentage || 0), 0);
+  const context = {
+    holders: Number(payload.holder_count || payload.holders_count || 0) || null,
+    topTenPercent: rawTopTen > 0 ? (rawTopTen <= 1 ? rawTopTen * 100 : rawTopTen) : null,
+    creatorPercent: Number(payload.creator_percent || payload.owner_percent || 0) * 100 || null,
+  };
 
   if (network === "solana") {
     if (nested("freezable")) critical.push("Freeze authority is active");
@@ -58,9 +65,9 @@ function summarizeSecurity(payload: Record<string, unknown> | null, network: str
     else if (Number.isFinite(sellTax) && sellTax >= 0.05) caution.push(`${Math.round(sellTax * 100)}% sell tax reported`);
   }
 
-  if (critical.length) return { status: "blocked", label: "Critical risk detected", reasons: [...critical, ...caution], provider: "GoPlus" };
-  if (caution.length) return { status: "warn", label: "Review risk flags", reasons: caution, provider: "GoPlus" };
-  return { status: "clear", label: "No critical flags found", reasons: [], provider: "GoPlus" };
+  if (critical.length) return { status: "blocked", label: "Critical risk detected", reasons: [...critical, ...caution], provider: "GoPlus", ...context };
+  if (caution.length) return { status: "warn", label: "Review risk flags", reasons: caution, provider: "GoPlus", ...context };
+  return { status: "clear", label: "No critical flags found", reasons: [], provider: "GoPlus", ...context };
 }
 
 async function getSecurity(network: string, token: string) {

@@ -127,7 +127,7 @@ test("public controls, social graph, crews, live room, feed and market context w
   await owner.getByRole("button", { name: "Pin message" }).last().click();
   await expect(owner.getByText("Pinned in this room")).toBeVisible();
 
-  await owner.getByRole("button", { name: "Poll", exact: true }).click();
+  await owner.getByRole("button", { name: "Create poll", exact: true }).click();
   const poll = owner.locator(".poll-composer");
   await poll.getByPlaceholder("What should the room discuss next?").fill("What should we research next?");
   await poll.getByPlaceholder("Option 1").fill("New launches");
@@ -135,6 +135,13 @@ test("public controls, social graph, crews, live room, feed and market context w
   await poll.getByRole("button", { name: "Post poll" }).click();
   await expect(owner.locator(".feed-poll strong").filter({ hasText: "What should we research next?" })).toBeVisible();
   await owner.getByRole("button", { name: "New launches" }).click();
+
+  await owner.locator('.room-composer input[type="file"]').setInputFiles({
+    name: "qa-room-image.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"),
+  });
+  await expect(owner.getByRole("img", { name: "qa-room-image.png" })).toBeVisible({ timeout: 20_000 });
 
   await owner.getByRole("button", { name: "Sessions" }).click();
   await owner.getByRole("button", { name: "Schedule" }).click();

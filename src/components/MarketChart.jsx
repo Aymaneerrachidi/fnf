@@ -43,6 +43,8 @@ export function normalizePair(pair, searchedAddress, security = {}) {
     websites: pair.info?.websites || [],
     socials: pair.info?.socials || [],
     security: security[pair.chainId] || { status: "unknown", label: "Risk scan unavailable", reasons: [] },
+    holders: security[pair.chainId]?.holders || null,
+    topTenPercent: security[pair.chainId]?.topTenPercent || null,
   };
 }
 
@@ -122,9 +124,10 @@ export default function MarketChart({ onShare, onDirectShare, onPairChange, memb
         setPair(null); setCandles([]); setStatus("idle"); setError("No indexed pool exists for this exact contract on Solana, Base, BNB Chain, or Robinhood.");
         return;
       }
-      setResultsOpen(found.length > 1);
-      await choosePair(found[0], found.length === 1);
-      if (found.length > 1) setResultsOpen(true);
+      // Open the deepest pool immediately; alternate exact pools stay one click away
+      // instead of covering the chart and market summary after every search.
+      setResultsOpen(false);
+      await choosePair(found[0], true);
     } catch (cause) {
       setError(cause.message || "Contract lookup is unavailable."); setStatus("error");
     }
@@ -164,7 +167,15 @@ export default function MarketChart({ onShare, onDirectShare, onPairChange, memb
       {pair && <div className="market-price"><small>MC</small><strong>{marketCap}</strong><span className={pair.change >= 0 ? "is-up" : "is-down"}>{pair.change >= 0 ? "+" : ""}{pair.change.toFixed(2)}%</span></div>}
       <form className="market-search" onSubmit={(event) => { event.preventDefault(); runSearch(); }}><MagnifyingGlass size={15} weight="bold" /><input aria-label="Search exact contract address" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Paste Solana or 0x contract address" autoComplete="off" spellCheck="false" /><button type="submit" aria-label="Resolve contract"><span>↵</span></button>{resultsOpen && results.length > 1 && <div className="market-results"><header><b>Exact contract found on {new Set(results.map((item) => item.network)).size} chain(s)</b><small>Best liquidity selected</small></header>{results.slice(0, 10).map((item) => <button key={item.id} type="button" className={pair?.id === item.id ? "active" : ""} onClick={() => choosePair(item)}><span><b>{item.symbol} / {item.quote}</b><small>{NETWORK_LABELS[item.network]} · {item.dex}</small></span><em>${compactMoney.format(item.liquidity)} liq</em></button>)}</div>}</form>
     </header>
-    {pair && <><div className="market-desk__meta"><span>{NETWORK_LABELS[pair.network] || pair.network}</span><span>{timeframe.label} candles</span><span>24h vol ${compactMoney.format(pair.volume)}</span><span>liquidity ${compactMoney.format(pair.liquidity)}</span><span>{pair.buys} buys / {pair.sells} sells</span>{results.length > 1 && <button type="button" onClick={() => setResultsOpen((value) => !value)}>{results.length} exact pools</button>}<button type="button" onClick={() => navigator.clipboard?.writeText(pair.tokenAddress)}><Copy /> Copy CA</button>{pair.url && <a href={pair.url} target="_blank" rel="noreferrer">Source <ArrowSquareOut /></a>}<RiskStatus report={pair.security} />{pair.security?.status !== "blocked" && <div className="market-share"><button type="button" onClick={() => onShare?.(pair)}><PaperPlaneTilt />Post to room</button>{members.length > 0 && <button type="button" onClick={() => setShareOpen((value) => !value)}><UsersThree />Show online friend</button>}{shareOpen && <div className="market-share__menu"><strong>Send this live chart to</strong>{members.map((member) => <button key={member.user_id} type="button" onClick={() => { onDirectShare?.(member, pair); setShareOpen(false); }}>{member.avatar_url ? <img src={member.avatar_url} alt="" /> : <span>{member.display_name.slice(0, 2).toUpperCase()}</span>}<div><b>{member.display_name}</b><small>@{member.handle}</small></div></button>)}</div>}</div>}</div><div className="market-timeframes" aria-label="Chart timeframe">{TIMEFRAMES.map((item) => <button type="button" key={item.label} className={timeframe.label === item.label ? "active" : ""} onClick={() => setTimeframe(item)}>{item.label}</button>)}</div></>}
+    {pair && <div className="market-overview" aria-label={`${pair.symbol} market overview`}>
+      <div><span>Market cap</span><strong>{marketCap}</strong></div>
+      <div><span>Liquidity</span><strong>${compactMoney.format(pair.liquidity)}</strong></div>
+      <div><span>24h volume</span><strong>${compactMoney.format(pair.volume)}</strong></div>
+      <div><span>Holders</span><strong>{pair.holders ? compactMoney.format(pair.holders) : "Not indexed"}</strong>{pair.topTenPercent ? <small>Top 10 · {pair.topTenPercent.toFixed(1)}%</small> : null}</div>
+      <div><span>24h trades</span><strong>{compactMoney.format(pair.buys + pair.sells)}</strong><small>{pair.buys} buys · {pair.sells} sells</small></div>
+      <RiskStatus report={pair.security} />
+    </div>}
+    {pair && <><div className="market-desk__meta"><span>{NETWORK_LABELS[pair.network] || pair.network}</span><span>{timeframe.label} candles</span>{results.length > 1 && <button type="button" onClick={() => setResultsOpen((value) => !value)}>{results.length} exact pools</button>}<button type="button" onClick={() => navigator.clipboard?.writeText(pair.tokenAddress)}><Copy /> Copy CA</button>{pair.url && <a href={pair.url} target="_blank" rel="noreferrer">Source <ArrowSquareOut /></a>}{pair.security?.status !== "blocked" && <div className="market-share"><button type="button" onClick={() => onShare?.(pair)}><PaperPlaneTilt />Post to room</button>{members.length > 0 && <button type="button" onClick={() => setShareOpen((value) => !value)}><UsersThree />Show online friend</button>}{shareOpen && <div className="market-share__menu"><strong>Send this live chart to</strong>{members.map((member) => <button key={member.user_id} type="button" onClick={() => { onDirectShare?.(member, pair); setShareOpen(false); }}>{member.avatar_url ? <img src={member.avatar_url} alt="" /> : <span>{member.display_name.slice(0, 2).toUpperCase()}</span>}<div><b>{member.display_name}</b><small>@{member.handle}</small></div></button>)}</div>}</div>}</div><div className="market-timeframes" aria-label="Chart timeframe">{TIMEFRAMES.map((item) => <button type="button" key={item.label} className={timeframe.label === item.label ? "active" : ""} onClick={() => setTimeframe(item)}>{item.label}</button>)}</div></>}
     <div className="market-chart" ref={hostRef}>
       {(status === "loading" || status === "searching") && <div className="market-state"><SpinnerGap className="animate-spin" size={22} />{status === "searching" ? "Resolving exact contract and scanning risk…" : "Loading live candles…"}</div>}
       {status === "idle" && !error && <div className="market-state market-state--empty"><MagnifyingGlass size={27} /><b>CA only. No ticker guessing.</b><span>Paste the full token contract. FNF checks exact pools across all four networks, then opens the deepest market.</span></div>}
