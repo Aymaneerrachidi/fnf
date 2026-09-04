@@ -14,6 +14,7 @@ async function callMarketData(params) {
   Object.entries(params).forEach(([key, value]) => endpoint.searchParams.set(key, String(value)));
 
   const response = await fetch(endpoint, {
+    signal: AbortSignal.timeout(16000),
     headers: {
       apikey: supabaseAnonKey,
       Authorization: `Bearer ${accessToken}`,
@@ -24,8 +25,8 @@ async function callMarketData(params) {
   return payload;
 }
 
-export function searchTokens(query) {
-  return callMarketData({ action: "search", q: query });
+export function resolveContract(address) {
+  return callMarketData({ action: "resolve", address });
 }
 
 export function getTokenPools(tokenAddress) {

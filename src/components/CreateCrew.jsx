@@ -12,7 +12,7 @@ const EMPTY = {
   avatarUrl: "",
   trading: "Memecoins",
   lang: "English",
-  hours: "Europe",
+  hours: Intl.DateTimeFormat().resolvedOptions().timeZone || "Around the clock",
   voice: "Voice daily",
   seats: "8",
 };
